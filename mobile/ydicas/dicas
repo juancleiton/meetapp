@@ -1,0 +1,2571 @@
+Iniciar o EMULADOR DO ANDROID STUDIO
+
+sudo chmod 777 /dev/kvm
+
+================================================================================
+
+No terminal do projeto: "react-native init mobile"
+
+================================================================================
+
+Configurar Eslint, Prettier e EditorConfig
+
+================================================================================
+
+Criar um EditorConfig e configurar:
+root = true
+
+[*]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+================================================================================
+
+yarn add eslint -D
+yarn eslint --init
+apagar o package.lock.json
+yarn
+yarn add @babel/core @babel/preset-env @babel/preset-react webpack webpack-cli -D
+yarn add prettier eslint-config-prettier eslint-plugin-prettier babel-eslint -D
+// yarn add babel-eslint@10.0.2 -D
+// yarn add webpack@4.39.1 -D
+
+================================================================================
+
+'.eslintrc.js':
+module.exports = {
+  env: {
+    es6: true,
+    jest: true,
+    browser: true
+  },
+  extends: ["airbnb", "prettier", "prettier/react"],
+  globals: {
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
+    __DEV__: true
+  },
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true
+    },
+    ecmaVersion: 2018,
+    sourceType: "module"
+  },
+  plugins: ["react", "jsx-a11y", "import", "react-hooks", "prettier"],
+  rules: {
+    "prettier/prettier": "error",
+    "react/jsx-filename-extension": ["error", { extensions: [".js", ".jsx"] }],
+    "import/prefer-default-export": "off",
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "react/jsx-one-expression-per-line": "off",
+    "global-require": "off",
+    "react-native/no-raw-text": "off",
+    "no-param-reassign": "off",
+    "no-underscore-dangle": "off",
+    camelcase: "off",
+    "no-console": ["error", { allow: ["tron"] }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  // settings: {
+  //   "import/resolver": {
+  //     "babel-plugin-root-import": {
+  //       rootPathSuffix: "src"
+  //     }
+  //   }
+  // }
+};
+
+'.prettierrc'
+{
+  "singleQuote": true,
+  "trailingComma": "es5"
+}
+
+depois apagar o negocio nos arquivos.
+yarn start para testar
+
+================================================================================
+
+Na raiz criar a pasta 'src' e dentro o arquivo 'index.js'
+'index.js' da 'src':
+import React from 'react';
+import {View} from 'react-native';
+
+// import { Container } from './styles';
+
+export default function App() {
+  return <View />;
+}
+
+// -------------------------------------------
+No 'index.js' da raiz, trocar
+import App from './App';
+para
+import App from './src';
+
+
+react-native start  (Para abrir no emulador);
+
+================================================================================
+
+CONFIGURANDO ROOT IMPORT
+
+para poder usar o '~' em vez de ficar voltando pastas
+
+"yarn add babel-plugin-root-import eslint-import-resolver-babel-plugin-root-import -D"
+
+ir no 'babel.config.js' e adicionar plugins:
+module.exports = {
+  presets: ['module:metro-react-native-babel-preset'],
+  plugins: [
+    [
+      'babel-plugin-root-import',
+      {
+        rootPathSuffix: 'src',
+      },
+    ],
+  ],
+};
+
+// -----------------------------------------------------------------------------
+
+ir no '.eslintrc.js' e adicionar settings:
+settings: {
+  "import/resolver": {
+    "babel-plugin-root-import": {
+      rootPathSuffix: "src"
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+Na raiz criar 'jsconfig.json' - para o vscode nao se perder nas importacoes
+
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "~/*": ["*"]
+    }
+  }
+}
+
+================================================================================
+
+Rotas de autenticacao
+
+"yarn add react-navigation react-native-gesture-handler" (NAVEGACAO)
+
+react-native run-android
+
+"yarn add jetifier -D" (Conserta bibliotecas, atualiza as bibliotecas)
+"yarn run jetify"
+
+'package.json': adiconar o "postinstall": "jetify"
+"scripts": {
+  "start": "react-native start",
+  "test": "jest",
+  "lint": "eslint .",
+  "postinstall": "jetify"
+},
+
+yarn add react-navigation
+
+// -----------------------------------------------------------------------------
+
+'MainActivity.java':
++ import com.facebook.react.ReactActivityDelegate;
++ import com.facebook.react.ReactRootView;
++ import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
+
++  @Override
++  protected ReactActivityDelegate createReactActivityDelegate() {
++    return new ReactActivityDelegate(this, getMainComponentName()) {
++      @Override
++      protected ReactRootView createRootView() {
++       return new RNGestureHandlerEnabledRootView(MainActivity.this);
++      }
++    };
++  }
+
+// -----------------------------------------------------------------------------
+
+'completo'
+
+import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactActivityDelegate;
+import com.facebook.react.ReactRootView;
+import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
+
+public class MainActivity extends ReactActivity {
+
+    /**
+     * Returns the name of the main component registered from JavaScript.
+     * This is used to schedule rendering of the component.
+     */
+    @Override
+    protected String getMainComponentName() {
+        return "modulo10";
+    }
+
+    @Override
+    protected ReactActivityDelegate createReactActivityDelegate() {
+      return new ReactActivityDelegate(this, getMainComponentName()) {
+        @Override
+        protected ReactRootView createRootView() {
+        return new RNGestureHandlerEnabledRootView(MainActivity.this);
+        }
+      };
+    }
+}
+
+
+
+react-native run-android
+
+================================================================================
+
+Criar um arquivo de rotas
+Na 'src' criar o arquivo 'routes.js'
+'routes.js':
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+
+
+Criar na 'src' a pasta 'pages', dentro a pasta 'SignIn' e dentro 'index.js'
+'pages/SignIn/index.js':
+
+import React from 'react';
+import { View } from 'react-native';
+
+// import {Container} from './styles';
+
+export default function SignIn() {
+  return <View />;
+}
+
+// -----------------------------------------------------------------------------
+
+e tambem SignUp
+'pages/SignUp/index.js':
+
+import React from 'react';
+import { View } from 'react-native';
+
+// import {Container} from './styles';
+
+export default function SignUp() {
+  return <View />;
+}
+
+// -----------------------------------------------------------------------------
+
+Importar essas duas Sign na 'routes.js' da 'src'
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+
+export default createAppContainer(
+  createSwitchNavigator({
+    SignIn,
+    SignUp,
+  })
+);
+
+// -----------------------------------------------------------------------------
+
+importar a 'routes.js' na 'index.js' da pasta 'src'
+import React from 'react';
+
+import Routes from './routes';
+
+export default function App() {
+  return <Routes />;
+}
+
+// -----------------------------------------------------------------------------
+
+E testar na 'SignIn' pra ve se aparece na tela
+
+import React from 'react';
+import { Text } from 'react-native';
+
+// import {Container} from './styles';
+
+export default function SignIn() {
+  return <Text>Ola</Text>;
+}
+
+================================================================================
+
+CONFIGURANDO BACKGROUND DA APLICACAO
+
+parte mais visual
+
+"yarn add react-native-linear-gradient"
+
+"react-native link react-native-linear-gradient"
+
+"yarn add styled-components"
+
+Criar na 'src' a pasta 'components', dentro a pasta 'Background' e dentro
+o arquivo 'index.js'
+
+'components/Background/index.js':
+
+import LinearGradient from 'react-native-linear-gradient';
+import styled from 'styled-components/native';
+
+export default styled(LinearGradient).attrs({
+  colors: ['#22202c', '#402845'],
+})`
+  flex: 1;
+`;
+
+
+// -----------------------------------------------------------------------------
+
+importar no SignIn, esse Background,
+pode dar erro, reinicie a aplicacao
+
+'index.js' da pasta 'SignIn':
+
+import React from 'react';
+import { Text } from 'react-native';
+
+import Background from '~/components/Background';
+
+// import {Container} from './styles';
+
+export default function SignIn() {
+  return (
+    <Background>
+      <Text>SignIn</Text>;
+    </Background>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'SignUp':
+
+import React from 'react';
+import { Text } from 'react-native';
+
+import Background from '~/components/Background';
+
+// import {Container} from './styles';
+
+export default function SignUp() {
+  return (
+    <Background>
+      <Text>SignUp</Text>
+    </Background>
+  );
+}
+
+================================================================================
+
+INPUT E BUTTON
+
+Input e Button- vao ser dois componentes globais,
+
+vao ser usados varias vezes na aplicacao
+
+Na pasta 'components' criar as pastas 'Button' e 'Input' e dentro de
+criar um 'index.js' e 'styles.js'
+
+'components/Input/index.js'
+'components/Input/styles.js'
+
+'components/Button/index.js'
+'components/Button/styles.js'
+
+// -----------------------------------------------------------------------------
+
+"yarn add prop-types"
+"yarn add react-native-vector-icons"
+"react-native link react-native-vector-icons"
+"react-native run-android"
+
+// -----------------------------------------------------------------------------
+
+'components/Input/index.js':
+import React, { forwardRef } from 'react';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import PropTypes from 'prop-types';
+
+import { Container, TInput } from './styles';
+
+function Input({ style, icon, ...rest }, ref) {
+  return (
+    <Container style={style}>
+      {icon && <Icon name={icon} size={20} color="rgba(255,255,255, 0.6)" />}
+      <TInput {...rest} ref={ref} />
+    </Container>
+  );
+}
+
+Input.propTypes = {
+  icon: PropTypes.string,
+  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+};
+
+Input.defaultProps = {
+  icon: null,
+  style: {},
+};
+
+export default forwardRef(Input);
+
+// -----------------------------------------------------------------------------
+
+'components/Input/styles.js'
+import styled from 'styled-components';
+
+export const Container = styled.View`
+  padding: 0 15px;
+  height: 46px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+
+  flex-direction: row;
+  align-items: center;
+`;
+
+export const TInput = styled.TextInput.attrs({
+  placeholderTextColor: 'rgba(255,255,255,0.8)',
+})`
+  flex: 1;
+  font-size: 15px;
+  margin-left: 10px;
+  color: #fff;
+`;
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignIn':
+importar o Input
+
+import React from 'react';
+import { Text } from 'react-native';
+
+import Input from '~/components/Input';
+import Background from '~/components/Background';
+
+// import {Container} from './styles';
+
+export default function SignIn() {
+  return (
+    <Background>
+      <Text>SignIn</Text>
+
+      <Input
+        style={{ marginTop: 30 }}
+        icon="call"
+        placeholder="Digite seu nome"
+      />
+    </Background>
+  );
+}
+
+SEMPRE SE DER ERRO, REINICIE A APLICACAO
+
+// -----------------------------------------------------------------------------
+
+BUTTON
+
+'components/Button/index.js'
+import React from 'react';
+import { ActivityIndicator } from 'react-native'; //Sinal de loading dentro do botao
+import PropTypes from 'prop-types';
+
+import { Container, Text } from './styles';
+
+export default function Button({ children, loading, ...rest }) {
+  return (
+    <Container {...rest}>
+      {loading ? (
+        <ActivityIndicator size="small" color="#FFF" />
+      ) : (
+        <Text>{children}</Text>
+      )}
+    </Container>
+  );
+}
+
+Button.propTypes = {
+  children: PropTypes.string.isRequired,
+  loading: PropTypes.bool,
+};
+
+Button.defaultProps = {
+  loading: false,
+};
+
+
+'components/Button/styles.js'
+import styled from 'styled-components';
+import { RectButton } from 'react-native-gesture-handler';
+
+export const Container = styled(RectButton)`
+  height: 46px;
+  background: #3b9eff;
+  border-radius: 4px;
+
+  align-items: center;
+  justify-content: center;
+`;
+
+export const Text = styled.Text`
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+`;
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignIn': <Button>Entrar</Button>
+importar o Button
+import React from 'react';
+import { Text } from 'react-native';
+
+import Input from '~/components/Input';
+import Button from '~/components/Button';
+import Background from '~/components/Background';
+
+// import {Container} from './styles';
+
+export default function SignIn() {
+  return (
+    <Background>
+      <Text>SignIn</Text>
+
+      <Input
+        style={{ marginTop: 30 }}
+        icon="call"
+        placeholder="Digite seu e-mail"
+      />
+      <Button>Entrar</Button>
+    </Background>
+  );
+}
+
+================================================================================
+
+PAGINA SIGNIN (logo) Basico
+
+criar o 'styles.js' na pasta 'SignIn'
+
+criar a pasta 'assets' na 'src' e baixar o png da logo no figma
+
+Ir no 'index.js' da pasta 'SignIn':
+
+import React from 'react';
+import { Image } from 'react-native';
+
+import logo from '~/assets/logo2x.png';
+
+import Background from '~/components/Background';
+
+import { Container } from './styles';
+
+export default function SignIn() {
+  return (
+    <Background>
+      <Container>
+        <Image source={logo} />
+      </Container>
+    </Background>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'SignIn':
+
+import { Platform } from 'react-native';
+import styled from 'styled-components';
+
+export const Container = styled.KeyboardAvoidingView.attrs({
+  enabled: Platform.OS === 'ios',
+  behavior: 'padding',
+})`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 0 30px;
+`;
+
+================================================================================
+
+Restante da pagina SignIn
+
+criar o 'styles.js' na pasta 'SignIn'
+
+criar a pasta 'assets' na 'src'
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignIn':
+import React from 'react';
+import { Image } from 'react-native';
+
+import logo from '~/assets/logo2x.png';
+
+import Background from '~/components/Background';
+
+import {
+  Container,
+  Form,
+  FormInput,
+  SubmitButton,
+  SignLink,
+  SignedLinkText,
+} from './styles';
+
+export default function SignIn({ navigation }) {
+  return (
+    <Background>
+      <Container>
+        <Image source={logo} />
+
+        <Form>
+          <FormInput
+            icon="mail-outline"
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Digite seu e-mail"
+          />
+
+          <FormInput
+            icon="lock-outline"
+            secureTextEntry // Deixar os pontinhos da senha
+            placeholder="Sua senha secreta"
+          />
+
+          <SubmitButton>Acessar</SubmitButton>
+        </Form>
+
+        <SignLink
+          onPress={() => {
+            navigation.navigate('SignUp'); // Para mudar de pagina
+          }}
+        >
+          <SignedLinkText>Criar conta grátis</SignedLinkText>
+        </SignLink>
+      </Container>
+    </Background>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'SignIn':
+
+import { Platform } from 'react-native';
+import styled from 'styled-components';
+
+import Input from '~/components/Input';
+import Button from '~/components/Button';
+
+export const Container = styled.KeyboardAvoidingView.attrs({
+  enabled: Platform.OS === 'ios',
+  behavior: 'padding',
+})`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 0 30px;
+`;
+
+export const Form = styled.View`
+  align-self: stretch;
+  margin-top: 50px;
+`;
+
+export const FormInput = styled(Input)`
+  margin-bottom: 10px;
+`;
+
+export const SubmitButton = styled(Button)`
+  margin-top: 5px;
+`;
+
+export const SignLink = styled.TouchableOpacity`
+  margin-top: 20px;
+`;
+
+export const SignedLinkText = styled.Text`
+  color: #999;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+// -----------------------------------------------------------------------------
+
+colocar a propriedade navigation dentro da function SignIn
+
+export default function SignIn({ navigation }){}
+
+e ir no button e colocar a navegacao e pagina
+
+<SubmitButton onPress={() => { navigation.navigate('SignUp');}}>
+  Acessar
+</SubmitButton>
+
+E quando clicar em Acessa vai ir pagina 'SignUp'
+
+================================================================================
+
+PAGINA SIGNUP
+
+Criar o arquivo 'styles.js' na pasta 'SignUp':
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'SignUp': adicionar o input de Nome completo
+
+import React from 'react';
+
+import { Image } from 'react-native';
+
+import logo from '~/assets/logo2x.png';
+import Background from '~/components/Background';
+
+import {
+  Container,
+  Form,
+  FormInput,
+  SubmitButton,
+  SignLink,
+  SignedLinkText,
+} from './styles';
+
+export default function SignUp({ navigation }) {
+  return (
+    <Background>
+      <Container>
+        <Image source={logo} />
+
+        <Form>
+          <FormInput
+            icon="person-outline"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Nome Completo"
+          />
+
+          <FormInput
+            icon="mail-outline"
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Digite seu e-mail"
+          />
+
+          <FormInput
+            icon="lock-outline"
+            secureTextEntry
+            placeholder="Sua senha secreta"
+          />
+
+          <SubmitButton onPress={() => {}}>Criar Conta</SubmitButton>
+        </Form>
+
+        <SignLink
+          onPress={() => {
+            navigation.navigate('SignIn');
+          }}
+        >
+          <SignedLinkText>Já tenho login</SignedLinkText>
+        </SignLink>
+      </Container>
+    </Background>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'SignUp':
+import { Platform } from 'react-native';
+import styled from 'styled-components';
+
+import Input from '~/components/Input';
+import Button from '~/components/Button';
+
+export const Container = styled.KeyboardAvoidingView.attrs({
+  enabled: Platform.OS === 'ios',
+  behavior: 'padding',
+})`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 0 30px;
+`;
+
+export const Form = styled.View`
+  align-self: stretch;
+  margin-top: 50px;
+`;
+
+export const FormInput = styled(Input)`
+  margin-bottom: 10px;
+`;
+
+export const SubmitButton = styled(Button)`
+  margin-top: 5px;
+`;
+
+export const SignLink = styled.TouchableOpacity`
+  margin-top: 20px;
+`;
+
+export const SignedLinkText = styled.Text`
+  color: #999;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+================================================================================
+
+CONFIGURANDO STATUS BAR - Barra superior do celular onde fica a hora e bateria
+
+Na 'index.js' da pasta 'src'
+importar o StatusBar
+
+import React from 'react';
+import { StatusBar } from 'react-native';
+
+import Routes from './routes';
+
+// import { Container } from './styles';
+
+export default function App() {
+  return (
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#22202c" />
+      <Routes />
+    </>
+  );
+}
+
+console.disableYellowBox = true; // Para tirar o erro amarelo de warning
+
+================================================================================
+
+DICAS DE ACESSIBILIDADE
+
+importar o useRef
+
+E colocar o ref no segundo Input,
+pra ficar puxando quando o input de cima terminar
+
+'index.js' da pasta 'SignIn':
+
+import React, { useRef } from 'react';
+
+export default function SignIn({ navigation }) {
+  const passwordRef = useRef();
+
+  function handleSubmit() {}
+  <Form>
+    <FormInput
+      icon="mail-outline"
+      keyboardType="email-address"
+      autoCorrect={false}
+      autoCapitalize="none"
+      placeholder="Digite seu e-mail"
+      returnKeyType="next" // O botao do teclado fica escrito "Next"
+      onSubmitEditing={() => passwordRef.current.focus()}
+    />
+
+    <FormInput
+      icon="lock-outline"
+      secureTextEntry // Deixar os pontinhos da senha
+      placeholder="Sua senha secreta"
+      ref={passwordRef} // Serve como referencia
+      returnKeyType="send" // O botao do teclado fica escrito "Send"
+      onSubmitEditing={handleSubmit} // Vai chamar a funcao para logar
+    />
+
+    <SubmitButton>Acessar</SubmitButton>
+  </Form>
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'SignUp':
+
+import React, { useRef } from 'react';
+
+export default function SignUp({ navigation }) {
+  const emailRef = useRef();
+  const passwordRef = useRef();
+
+  function handleSubmit() {}
+
+  <Form>
+    <FormInput
+      icon="person-outline"
+      autoCorrect={false}
+      autoCapitalize="none"
+      placeholder="Nome Completo"
+      returnKeyType="next"
+      onSubmitEditing={() => emailRef.current.focus()} // Depois que editar vai focar no email
+    />
+
+    <FormInput
+      icon="mail-outline"
+      keyboardType="email-address"
+      autoCorrect={false}
+      autoCapitalize="none"
+      placeholder="Digite seu e-mail"
+      ref={emailRef}
+      returnKeyType="next"
+      onSubmitEditing={() => passwordRef.current.focus()} // Depois que editar vai focar no email
+    />
+
+    <FormInput
+      icon="lock-outline"
+      secureTextEntry
+      placeholder="Sua senha secreta"
+      ref={passwordRef}
+      returnKeyType="send"
+      onSubmitEditing={handleSubmit} // Vai chamar a funcao para criar a conta
+    />
+
+    <SubmitButton onPress={() => {}}>Criar Conta</SubmitButton>
+  </Form>
+
+
+================================================================================
+
+CONFIGURANDO O REACTOTRON
+
+"yarn add redux redux-saga react-redux"
+"yarn add reactotron-react-native reactotron-redux reactotron-redux-saga"
+"yarn add @react-native-community/async-storage"
+
+Na 'src' criar a pasta 'config' e dentro o 'ReactotronConfig.js'
+
+'ReactotronConfig.js':
+import Reactotron from 'reactotron-react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+import { reactotronRedux } from 'reactotron-redux';
+import reactotronSaga from 'reactotron-redux-saga';
+
+if (__DEV__) {
+  const tron = Reactotron.configure({
+    host: '192.168.1.107',
+  })
+    .setAsyncStorageHandler(AsyncStorage)  // Para o Reactotron nao criar varias conexoes, importar com o Async-storage
+    .useReactNative()
+    .use(reactotronRedux())
+    .use(reactotronSaga())
+    .connect();
+
+  tron.clear();
+
+  console.tron = tron;
+}
+
+// -----------------------------------------------------------------------------
+
+"yarn add redux redux-saga react-redux"
+
+Ir no 'index.js' da 'src' e importar o 'ReactotronConfig.js'
+
+import React from 'react';
+import { StatusBar } from 'react-native';
+
+import './config/ReactotronConfig';
+
+import Routes from './routes';
+
+// -----------------------------------------------------------------------------
+
+E reiniciar o android se tiver dando erro
+E abrir o reactotron e ver se ta conectado
+
+================================================================================
+
+CONFIGURANDO REDUX
+
+Copiar a pasta store da versao web(frontend),
+porque ass configuracoes serao aas mesmas, apenas algumas alteracoes
+e colar na pasta 'src'
+
+No 'index.js' da pasta 'store'
+trocar,
+antes: process.env.NODE_ENV === 'development'
+
+por: process.env.__DEV__ === 'development'
+
+const sagaMonitor =
+  process.env.__DEV__ === 'development'
+    ? console.tron.createSagaMonitor()
+    : null;
+
+// -----------------------------------------------------------------------------
+
+"yarn add redux-persist immer"
+
+No 'createStore.js' da pasta 'store'
+trocar,
+antes: process.env.NODE_ENV === 'development'
+
+por: process.env.__DEV__ === 'development'
+
+================================================================================
+
+CONECTAR A API
+
+"yarn add axios"
+
+Na 'src' criar a pasta 'services' e dentro o arquivo 'api.js'
+
+'api.js':
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://10.0.2.2:3333', // Android Studio - 'http://10.0.2.2:3333' / Genymotion - 'http://10.0.3.2:3333'
+});
+
+export default api;
+
+================================================================================
+
+CONTINUANDO CONFIGURACAO DO REDUX
+
+Ir no 'sagas.js' da pasta 'auth'
+
+e fazer mudar,
+apagar o que tem history
+trocar o toastify pelo Alert do react-native
+e tirar o provider como true, apagar
+
+'sagas.js' da pasta 'auth':
+
+import { Alert } from 'react-native';
+
+import { all, call, put, takeLatest } from 'redux-saga/effects';
+
+import api from '~/services/api';
+
+import { signInSuccess, signFailure } from './actions';
+
+export function* signIn({ payload }) {
+  try {
+    const { email, password } = payload;
+
+    const response = yield call(api.post, 'sessions', {
+      email,
+      password,
+    });
+
+    const { token, user } = response.data;
+
+    api.defaults.headers.authorization = `Bearer ${token}`;
+
+    yield put(signInSuccess(token, user)); // AQUI VAI DISPARAR O signInSuccess la da actions
+  } catch (err) {
+    Alert.alert(
+      'Falha na autenticação',
+      'Houve um erro no login, verifique seus dados'
+    );
+
+    yield put(signFailure()); // para tirar o loading
+  }
+}
+
+export function* signUp({ payload }) {
+  try {
+    const { name, email, password } = payload;
+
+    yield call(api.post, 'users', {
+      name,
+      email,
+      password,
+    });
+  } catch (err) {
+    Alert.alert(
+      'Falha no cadastro',
+      'Houve um erro no cadastro, verifique seus dados'
+    );
+
+    yield put(signFailure()); // para tirar o loading
+  }
+}
+
+// Para salvar o token em todas as paginas
+export function setToken({ payload }) {
+  if (!payload) return;
+
+  const { token } = payload.auth;
+
+  if (token) {
+    api.defaults.headers.authorization = `Bearer ${token}`;
+  }
+}
+
+// FAZER LOGOUT, vai deslogar e levar para a pagina principal de login
+export function signOut() {}
+
+export default all([
+  takeLatest('persist/REHYDRATE', setToken),
+  takeLatest('@auth/SIGN_IN_REQUEST', signIn),
+  takeLatest('@auth/SIGN_UP_REQUEST', signUp),
+  takeLatest('@auth/SIGN_OUT', signOut),
+]);
+
+// -----------------------------------------------------------------------------
+
+Ir no 'sagas.js' da pasta 'user': Fazer os Alert tambem
+
+'sagas.js' da pasta 'user':
+import { Alert } from 'react-native';
+
+import { all, takeLatest, call, put } from 'redux-saga/effects';
+
+import api from '~/services/api';
+import { updateProfileSuccess, updateProfileFailure } from './actions';
+
+export function* updateProfile({ payload }) {
+  try {
+    const { name, email, avatar_id, ...rest } = payload.data;
+
+    // Unir dois objetos, se existir o campo oldPassword, vai colocar dentro da variavel rest
+    // eslint-disable-next-line prefer-object-spread
+    const profile = Object.assign(
+      { name, email, avatar_id },
+      rest.oldPassword ? rest : {}
+    );
+
+    const response = yield call(api.put, 'users', profile);
+
+    Alert.alert('Sucesso!', 'Perfil atualizado com sucesso');
+
+    // Vai disparar essa action, pegando a variavel response, que recebeu os dados na variavel profile passado logo acima
+    yield put(updateProfileSuccess(response.data));
+  } catch (err) {
+    Alert.alert(
+      'Falha na atualização',
+      'Houve um erro na atualização do perfil, verifique seus dados'
+    );
+
+    yield put(updateProfileFailure()); // para tirar o loading
+  }
+}
+
+export default all([takeLatest('@user/UPDATE_PROFILE_REQUEST', updateProfile)]);
+
+================================================================================
+
+ir no 'index.js' da 'src'
+e importar o PersistGate,
+e importar o Provider, e o store, persistor
+
+'index.js' da 'src':
+import React from 'react';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
+
+import { StatusBar } from 'react-native';
+
+import './config/ReactotronConfig';
+
+import { store, persistor } from './store';
+import Routes from './routes';
+
+// import { Container } from './styles';
+
+export default function App() {
+  return (
+    <>
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <StatusBar barStyle="light-content" backgroundColor="#22202c" />
+          <Routes />
+        </PersistGate>
+      </Provider>
+    </>
+  );
+}
+
+console.disableYellowBox = true; // Para tirar o erro amarelo de warning
+
+// -----------------------------------------------------------------------------
+
+o storage foi removido do redux-persist
+
+Ir no 'persistReducers.js' da pasta 'store' e alterar para
+
+import AsyncStorage from '@react-native-community/async-storage';
+import { persistReducer } from 'redux-persist';
+
+export default reducers => {
+  const persistedReducer = persistReducer(
+    {
+      key: 'meetapp',
+      storage: AsyncStorage,
+      whitelist: ['auth', 'user'],
+    },
+    reducers
+  );
+
+  return persistedReducer;
+};
+
+
+react-native start --reset-cache
+react-native run-android
+
+================================================================================
+
+CONECTANDO REDUX
+
+Conectar a pagina de SignIn e SignUp com o redux
+
+Usar o useDispatch para disparar uma action,
+Colocar o estados de email e password,
+******* o dispatch dentro da funcao handleSubmit
+******* o value e o onChangeText
+******* pra disparar a funcao handleSubmit no botao
+
+colocar o loading tb, ai vai aparecer a rodinha de loading com o ActivityIndicator
+do Button na pasta 'components'. 'Button/index.js'
+
+// -----------------------------------------------------------------------------
+
+SignIn
+
+Ir no 'index.js' da pasta 'SignIn':
+import React, { useRef, useState } from 'react';
+import { Image } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
+import logo from '~/assets/logo2x.png';
+
+import Background from '~/components/Background';
+
+import { signInRequest } from '~/store/modules/auth/actions';
+
+import {
+  Container,
+  Form,
+  FormInput,
+  SubmitButton,
+  SignLink,
+  SignedLinkText,
+} from './styles';
+
+export default function SignIn({ navigation }) {
+  const dispatch = useDispatch();
+  const passwordRef = useRef();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const loading = useSelector(state => state.auth.loading); // useSelector serve para acessar o state do reducer
+
+  function handleSubmit() {
+    dispatch(signInRequest(email, password));
+  }
+
+  return (
+    <Background>
+      <Container>
+        <Image source={logo} />
+
+        <Form>
+          <FormInput
+            icon="mail-outline"
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Digite seu e-mail"
+            returnKeyType="next" // O botao do teclado fica escrito "Next"
+            onSubmitEditing={() => passwordRef.current.focus()} // Depois que editar vai focar no email, ref={passwordRef}
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <FormInput
+            icon="lock-outline"
+            secureTextEntry // Deixar os pontinhos da senha
+            placeholder="Sua senha secreta"
+            ref={passwordRef} // Serve como referencia
+            returnKeyType="send" // O botao do teclado fica escrito "Send"
+            onSubmitEditing={handleSubmit} // Vai chamar a funcao para logar
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <SubmitButton loading={loading} onPress={handleSubmit}>
+            Acessar
+          </SubmitButton>
+        </Form>
+
+        <SignLink
+          onPress={() => {
+            navigation.navigate('SignUp'); // Para mudar de pagina
+          }}
+        >
+          <SignedLinkText>Criar conta grátis</SignedLinkText>
+        </SignLink>
+      </Container>
+    </Background>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+SignUp
+
+Ir no 'index.js' da pasta 'SignUp':
+import React, { useRef, useState } from 'react';
+import { Image } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
+import logo from '~/assets/logo2x.png';
+import Background from '~/components/Background';
+
+import { signUpRequest } from '~/store/modules/auth/actions';
+
+import {
+  Container,
+  Form,
+  FormInput,
+  SubmitButton,
+  SignLink,
+  SignedLinkText,
+} from './styles';
+
+export default function SignUp({ navigation }) {
+  const dispatch = useDispatch();
+
+  const emailRef = useRef();
+  const passwordRef = useRef();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const loading = useSelector(state => state.auth.loading);
+
+  function handleSubmit() {
+    dispatch(signUpRequest(name, email, password));
+  }
+
+  return (
+    <Background>
+      <Container>
+        <Image source={logo} />
+
+        <Form>
+          <FormInput
+            icon="person-outline"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Nome Completo"
+            returnKeyType="next"
+            onSubmitEditing={() => emailRef.current.focus()} // Depois que editar vai focar no email
+            value={name}
+            onChangeText={setName}
+          />
+
+          <FormInput
+            icon="mail-outline"
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Digite seu e-mail"
+            ref={emailRef}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current.focus()} // Depois que editar vai focar no email
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <FormInput
+            icon="lock-outline"
+            secureTextEntry
+            placeholder="Sua senha secreta"
+            ref={passwordRef}
+            returnKeyType="send"
+            onSubmitEditing={handleSubmit} // Vai chamar a funcao para criar a conta
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <SubmitButton loading={loading} onPress={handleSubmit}>
+            Criar Conta
+          </SubmitButton>
+        </Form>
+
+        <SignLink
+          onPress={() => {
+            navigation.navigate('SignIn');
+          }}
+        >
+          <SignedLinkText>Já tenho login</SignedLinkText>
+        </SignLink>
+      </Container>
+    </Background>
+  );
+}
+
+================================================================================
+
+ROTA INICIAL
+
+Se o usuario ja estiver logado, ele ja caia na rota 'dashboard'
+Quando o usuario logar, mudar de tela, de rota para 'dashboard'
+
+// -----------------------------------------------------------------------------
+
+Na pasta 'pages' criar a pasta 'Dashboard' com 'index.js' dentro:
+
+'index.js' da 'Dashboard'
+import React from 'react';
+import { View } from 'react-native';
+
+// import { Container } from './styles.js';
+
+export default function Dashboard() {
+  return <View />;
+}
+
+// -----------------------------------------------------------------------------
+
+Na pasta 'src' criar o arquivo 'App.js',
+nele que vai ficar as rotas, e ele pode acessar ass informacoes do redux
+
+// -----------------------------------------------------------------------------
+
+No 'index.js' da 'src' trocar o nome da funcao de App para Index.
+E tirar a Routes colocando o App no lugar, pq a rotas vao estar no 'App.js'
+
+'index.js' da 'src'
+import React from 'react';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
+import { StatusBar } from 'react-native';
+
+import './config/ReactotronConfig';
+
+import { store, persistor } from './store';
+import App from './App';
+
+export default function Index() {
+  return (
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
+        <App />
+      </PersistGate>
+    </Provider>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+"yarn add react-native-reanimated"
+"yarn add react-navigation-tabs"
+
+// -----------------------------------------------------------------------------
+
+Em 'routes.js': Criar a rota de quem ja ta autenticado
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
+
+import SignIn from '~/pages/SignIn';
+import SignUp from '~/pages/SignUp';
+
+import Dashboard from '~/pages/Dashboard';
+
+export default (isSigned = false) =>
+  createAppContainer(
+    createSwitchNavigator(
+      {
+        Sign: createSwitchNavigator({
+          SignIn,
+          SignUp,
+        }),
+        App: createBottomTabNavigator({
+          Dashboard,
+        }),
+      },
+      {
+        // Se o isSigned passado por parametro, for true(logado) vai para 'App',
+        // se for false (nao logado) vai para 'Sign'
+        initialRouteName: isSigned ? 'App' : 'Sign',
+      }
+    )
+  );
+
+// -----------------------------------------------------------------------------
+
+'App.js' da 'src':
+import React from 'react';
+import { useSelector } from 'react-redux';
+
+import createRouter from './routes'; // É a condicao que esta no arquivo 'routes.js'
+
+export default function App() {
+  const signed = useSelector(state => state.auth.signed); // Vai buscar no state se o usuario esta logado ou nao
+
+  const Routes = createRouter(signed); // A condicao com signed, se for true(logado) vai para 'App', se for false (nao logado) vai para 'Sign'. Parametro la do 'routes.js' isSigned
+
+  return <Routes />; // Ai aqui vai mudar de pagina
+}
+
+================================================================================
+
+ESTILIZACAO DA ROTA DASHBOARD
+
+'index.js' da pasta 'Dashboard':
+import React from 'react';
+import { View } from 'react-native';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+// import { Container } from './styles';
+
+export default function Dashboard() {
+  return <View />;
+}
+
+Dashboard.navigationOptions = {
+  tabBarLabel: 'Meetups',
+  tabBarIcon: ({ tintColor }) => (
+    <Icon name="list" size={30} color={tintColor} />
+  ),
+};
+
+
+// -----------------------------------------------------------------------------
+
+Em 'routes.js' da 'src':
+App: createBottomTabNavigator(
+  {
+    Dashboard,
+  },
+  {
+    tabBarOptions: {
+      keyboardHidesTabBar: true,
+      activeTintColor: '#fff',
+      inactiveTintColor: '#999',
+      style: {
+        backgroundColor: '#22202c',
+      },
+    },
+  }
+),
+
+================================================================================
+
+ESTILIZACAO DA ROTA PROFILE
+
+Na 'Pages' criar a pasta 'Profile' com o 'index.js' dentro:
+
+'index.js' da pasta 'Profile':
+import React from 'react';
+import { View } from 'react-native';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+// import { Container } from './styles';
+
+export default function Profile() {
+  return <View />;
+}
+
+Profile.navigationOptions = {
+  tabBarLabel: 'Meu perfil',
+  tabBarIcon: ({ tintColor }) => (
+    <Icon name="person" size={30} color={tintColor} />
+  ),
+};
+
+// -----------------------------------------------------------------------------
+
+E na 'routes.js' importar o Profile e colocar o Profile depois de Dashboard
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+
+App: createBottomTabNavigator(
+  {
+    Dashboard,
+    Profile,
+  },
+)
+
+================================================================================
+
+BACKGROUND NAS PAGINA DASHBOARD E PROFILE
+
+importar o background para ficar na tela de Dashboard e Profile
+e colocar o Background no lugar da <View />
+
+'index.js' da 'Dashboard'
+e
+'index.js' da 'Profile':
+
+import React from 'react';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Background from '~/components/Background';
+
+// import { Container } from './styles';
+
+export default function Dashboard() {
+  return <Background />;
+}
+
+// -----------------------------------------------------------------------------
+
+Criar um component para o Header
+
+Ir na pasta 'components' e criar a pasta 'Header' e o 'index.js' e 'styles.js':
+
+'index.js' da pasta 'components/Header':
+import React from 'react';
+
+import logo from '~/assets/logo.png';
+
+import { Container, Logo } from './styles';
+
+export default function Header() {
+  return (
+    <Container>
+      <Logo source={logo} />
+    </Container>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'components/Header':
+import styled from 'styled-components/native';
+
+export const Container = styled.SafeAreaView`
+  background: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+`;
+
+export const Logo = styled.Image`
+  justify-content: center;
+  align-items: center;
+`;
+
+// -----------------------------------------------------------------------------
+
+E importar na 'index.js' da pasta Dashboard e Profile
+
+import React from 'react';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Background from '~/components/Background';
+import Header from '~/components/Header';
+
+// import { Container } from './styles';
+
+export default function Dashboard() {
+  return (
+    <Background>
+      <Header />
+    </Background>
+  );
+}
+
+================================================================================
+
+Na pasta 'Dashboard' criar o arquivo 'styles.js':
+
+import styled from 'styled-components/native';
+
+export const Container = styled.SafeAreaView`
+  flex: 1;
+`;
+
+================================================================================
+
+LISTA DE AGENDAMENTOS
+
+ESTILIZANDO PAGINA DE DASHBOARD
+
+'index.js' da 'Dashboard':
+import React from 'react';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Background from '~/components/Background';
+import Header from '~/components/Header';
+import CardMeetup from '~/components/CardMeetup';
+
+import { Container, List } from './styles';
+
+const data = [1, 2, 3, 4, 5];
+
+export default function Dashboard() {
+  return (
+    <Background>
+      <Header />
+      <Container>
+        <List
+          data={data}
+          keyExtractor={item => String(item)}
+          renderItem={({ item }) => <CardMeetup data={item} />}
+        />
+      </Container>
+    </Background>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da 'Dashboard':
+import styled from 'styled-components/native';
+
+export const Container = styled.SafeAreaView`
+  flex: 1;
+`;
+
+export const List = styled.FlatList.attrs({
+  showsVerticalScrollIndicator: false,
+})``;
+
+================================================================================
+
+COMPONENT CARDMEETUP - BASICO
+
+Fazer um component para buscar os meetups e renderizar na tela
+
+Na pasta 'components' criar a pasta 'CardMeetup' e dentro 'index.js' e 'styles.js':
+
+'index.js' da pasta 'CardMeetup':
+import React from 'react';
+import { View } from 'react-native';
+
+import Button from '~/components/Button';
+import { Container, Banner, Info, Title, InfoRow, InfoText } from './styles';
+
+export default function CardMeetup() {
+  return (
+    <Container>
+      <Banner
+        source={{ uri: 'http://api.adorable.io/avatar/50/rocketseat.png' }}
+      />
+
+      <Info>
+        <Title>Meetup de React Native</Title>
+
+        <InfoRow>
+          <InfoText>24 de junho</InfoText>
+          <InfoText>Rio</InfoText>
+          <InfoText>Eu</InfoText>
+        </InfoRow>
+
+        <Button>Realizar Inscrição</Button>
+      </Info>
+    </Container>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'CardMeetup':
+
+import styled from 'styled-components';
+
+export const Container = styled.View`
+  background: #fff;
+  border-radius: 4px;
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-bottom: 15px;
+  overflow: hidden;
+`;
+
+export const Banner = styled.Image.attrs({
+  resizeMode: 'cover',
+})`
+  width: 100%;
+  height: 140px;
+  align-content: stretch;
+`;
+
+export const Info = styled.View`
+  padding: 20px;
+`;
+export const Title = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 15px;
+`;
+
+export const InfoRow = styled.View`
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+export const InfoText = styled.Text`
+  font-size: 14px;
+  color: #888;
+  margin-left: 6px;
+`;
+
+================================================================================
+
+BUSCAR OS MEETUPS DA API E RENDERIZAR NA TELA COM AS INFORMACOES
+
+BASICO
+
+'index.js' da 'Dashboard': importar a api
+import React, { useEffect, useState } from 'react';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import api from '~/services/api';
+
+import Background from '~/components/Background';
+import Header from '~/components/Header';
+import CardMeetup from '~/components/CardMeetup';
+
+import { Container, List } from './styles';
+
+export default function Dashboard() {
+  const [date, setDate] = useState(new Date());
+
+  const [meetups, setMeetups] = useState([]);
+
+  useEffect(() => {
+    async function loadMeetups() {
+      const response = await api.get('meetups', { params: date });
+
+      setMeetups(response.data);
+    }
+
+    loadMeetups();
+  }, []);
+
+  return (
+    <Background>
+      <Header />
+      <Container>
+        <List
+          data={meetups}
+          keyExtractor={item => String(item.id)}
+          renderItem={({ item }) => <CardMeetup data={item} />}
+        />
+      </Container>
+    </Background>
+  );
+}
+
+Dashboard.navigationOptions = {
+  tabBarLabel: 'Meetups',
+  tabBarIcon: ({ tintColor }) => (
+    <Icon name="list" size={30} color={tintColor} />
+  ),
+};
+
+// -----------------------------------------------------------------------------
+
+'index.js' da 'CardMeetup':
+import React from 'react';
+
+import Button from '~/components/Button';
+import { Container, Banner, Info, Title, InfoRow, InfoText } from './styles';
+
+export default function CardMeetup({ data }) {
+  return (
+    <Container>
+      <Banner
+        source={{
+          uri: data.banner
+            ? data.banner.url.replace('localhost', '192.168.1.107')
+            : `https://api.adorable.io/avatars/50/${data.title}.png`,
+        }}
+      />
+
+      <Info>
+        <Title>{data.title}</Title>
+
+        <InfoRow>
+          <InfoText>{data.date}</InfoText>
+        </InfoRow>
+
+        <InfoRow>
+          <InfoText>{data.location}</InfoText>
+        </InfoRow>
+
+        <InfoRow>
+          <InfoText>{data.user.name}</InfoText>
+        </InfoRow>
+
+        <Button>Realizar Inscrição</Button>
+      </Info>
+    </Container>
+  );
+}
+
+================================================================================
+
+Criar o component Loading:
+
+'index.js' da 'Loading':
+import React from 'react';
+import { ActivityIndicator } from 'react-native';
+
+import { Container } from './styles';
+
+export default function Loading() {
+  return (
+    <Container>
+      <ActivityIndicator size={90} color="#fff" />
+    </Container>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da 'Loading':
+import styled from 'styled-components';
+
+export const Container = styled.View`
+  flex: 1;
+  align-items: center;
+`;
+
+================================================================================
+
+AGORA FAZER TODA AS REGRAS DE NEGOCIO DA DASHBOARD E CARDMEETUP
+e estilizacoes a mais
+
+yarn add date-fns@next
+
+'index.js' da 'Dashboard':
+import React, { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import { withNavigationFocus } from 'react-navigation';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { format, subDays, addDays } from 'date-fns';
+
+import Background from '~/components/Background';
+import Header from '~/components/Header';
+import Loading from '~/components/Loading';
+import CardMeetup from '~/components/CardMeetup';
+
+import {
+  Container,
+  DateSelect,
+  DateButton,
+  DateText,
+  Empty,
+  EmptyText,
+  List,
+} from './styles';
+
+import api from '~/services/api';
+
+function Dashboard({ isFocused }) {
+  const [date, setDate] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [meetups, setMeetups] = useState([]);
+  const [page, setPage] = useState();
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function loadMeetups(selectedPage = 1) {
+    const response = await api.get('meetups', {
+      params: { date, page: selectedPage },
+    });
+
+    setMeetups(
+      selectedPage > 1 ? [...meetups, ...response.data] : response.data
+    );
+    setPage(selectedPage);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    if (isFocused) {
+      setLoading(true);
+      loadMeetups();
+    }
+  }, [isFocused, date]);
+
+  function handleDecrementDate() {
+    if (date < new Date()) return;
+    setDate(subDays(date, 1));
+  }
+
+  function handleIncrementDate() {
+    setDate(addDays(date, 1));
+  }
+
+  async function handleRegister(id) {
+    try {
+      await api.post(`meetups/${id}/subscriptions`);
+      Alert.alert('Sucesso', 'Você se inscreveu neste meetup');
+      loadMeetups();
+    } catch (error) {
+      Alert.alert('Error', 'Você já esta inscrito neste meetup');
+      loadMeetups();
+    }
+  }
+
+  return (
+    <Background>
+      <Header />
+      <Container>
+        <DateSelect>
+          <DateButton onPress={handleDecrementDate}>
+            <Icon name="chevron-left" size={25} color="#fff" />
+          </DateButton>
+          <DateText>{format(date, 'dd/MM/Y')}</DateText>
+          <DateButton onPress={handleIncrementDate}>
+            <Icon name="chevron-right" size={25} color="#fff" />
+          </DateButton>
+        </DateSelect>
+
+        {loading && <Loading />}
+
+        {!loading &&
+          (meetups.length ? (
+            <List
+              data={meetups}
+              keyExtractor={item => String(item.id)}
+              renderItem={({ item }) => (
+                <CardMeetup
+                  data={item}
+                  handleRegister={() => handleRegister(item.id)}
+                />
+              )}
+              onRefresh={loadMeetups}
+              refreshing={refreshing}
+              onEndReached={() => loadMeetups(page + 1)}
+              onEndReachedThreshold={0.2}
+            />
+          ) : (
+            <Empty>
+              <Icon name="event-busy" size={45} color="#fff" />
+              <EmptyText>Não existe meetups nesta data</EmptyText>
+            </Empty>
+          ))}
+      </Container>
+    </Background>
+  );
+}
+
+Dashboard.navigationOptions = {
+  tabBarLabel: 'Meetups',
+  tabBarIcon: ({ tintColor }) => (
+    <Icon name="list" size={30} color={tintColor} />
+  ),
+};
+
+export default withNavigationFocus(Dashboard);
+
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da 'Dashboard':
+import styled from 'styled-components/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
+export const Container = styled.SafeAreaView`
+  flex: 1;
+`;
+
+export const List = styled.FlatList.attrs({
+  showsVerticalScrollIndicator: false,
+})``;
+
+export const DateSelect = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+export const DateButton = styled(TouchableOpacity)``;
+
+export const DateText = styled.Text`
+  font-size: 18px;
+  color: #fff;
+  font-weight: bold;
+  margin: 0 15px;
+`;
+
+export const Empty = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+export const EmptyText = styled.Text`
+  font-size: 14px;
+  color: #fff;
+  margin-top: 15px;
+`;
+
+
+// -----------------------------------------------------------------------------
+
+CardMeetup
+
+'index.js' da 'CardMeetup':
+import React from 'react';
+import PropTypes from 'prop-types';
+import { format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Button from '~/components/Button';
+import { Container, Banner, Info, Title, InfoRow, InfoText } from './styles';
+
+export default function CardMeetup({ data, handleRegister, handleCancel }) {
+  return (
+    <Container>
+      <Banner
+        source={{
+          uri: data.banner
+            ? data.banner.url.replace('localhost', '192.168.1.107')
+            : `https://api.adorable.io/avatars/50/${data.title}.png`,
+        }}
+      />
+
+      <Info>
+        <Title>{data.title}</Title>
+
+        <InfoRow>
+          <Icon name="event" size={15} color="#999" />
+          <InfoText>
+            {format(parseISO(data.date), "dd 'de' MMMM 'às' HH'h'mm", {
+              locale: pt,
+            })}
+          </InfoText>
+        </InfoRow>
+
+        <InfoRow>
+          <Icon name="location-on" size={15} color="#999" />
+          <InfoText>{data.location}</InfoText>
+        </InfoRow>
+
+        <InfoRow>
+          <Icon name="person" size={15} color="#999" />
+          <InfoText>Organizador: {data.user.name}</InfoText>
+        </InfoRow>
+
+        {handleRegister && !data.past && (
+          <Button onPress={handleRegister}>Realizar Inscrição</Button>
+        )}
+
+        {handleCancel && (
+          <Button onPress={handleCancel}>Cancelar Inscrição</Button>
+        )}
+      </Info>
+    </Container>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da 'CardMeetup':
+import styled from 'styled-components';
+
+export const Container = styled.View`
+  background: #fff;
+  border-radius: 4px;
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-bottom: 15px;
+  overflow: hidden;
+`;
+
+export const Banner = styled.Image.attrs({
+  resizeMode: 'cover',
+})`
+  width: 100%;
+  height: 140px;
+  align-content: stretch;
+`;
+
+export const Info = styled.View`
+  padding: 20px;
+`;
+export const Title = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 15px;
+`;
+
+export const InfoRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+export const InfoText = styled.Text`
+  font-size: 14px;
+  color: #888;
+  margin-left: 6px;
+`;
+
+================================================================================
+
+CRIAR A PAGINA INSCRICOES PARA LISTAR OS MEETUPS QUE O USUARIO ESTA INSCRITO
+E ELE PODER CANCELAR
+
+Criar na 'pages' a pasta 'Subscriptions' e dentro a 'index.js' e 'styles.js'
+
+'index.js' da 'Subscriptions':
+import React, { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import { withNavigationFocus } from 'react-navigation'; // Quando qualquer coisa for alterada, ele vai atualizar a pagina com o isFocused
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Background from '~/components/Background';
+import Header from '~/components/Header';
+import Loading from '~/components/Loading';
+import CardMeetup from '~/components/CardMeetup';
+
+import { Container, Empty, EmptyText, List } from './styles';
+
+import api from '~/services/api';
+
+function Subscriptions({ isFocused }) {
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function loadSubscriptions() {
+    const response = await api.get('subscriptions');
+
+    setSubscriptions(response.data);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    if (isFocused) {
+      setLoading(true);
+      loadSubscriptions();
+    }
+  }, [isFocused]);
+
+  async function handleCancel(id) {
+    try {
+      await api.delete(`meetups/${id}/subscriptions`);
+      Alert.alert('Sucesso', 'Poxa que pena! Se inscreva em outro meetup!');
+      loadSubscriptions();
+    } catch (error) {
+      const message = error.response.data.error;
+      Alert.alert('Erro', message);
+    }
+  }
+
+  return (
+    <Background>
+      <Header />
+      <Container>
+        {loading && <Loading />}
+
+        {!loading &&
+          (subscriptions.length ? (
+            <List
+              data={subscriptions}
+              keyExtractor={item => String(item.id)}
+              renderItem={({ item }) => (
+                <CardMeetup
+                  data={item.meetup}
+                  handleCancel={() => handleCancel(item.meetup_id)}
+                />
+              )}
+              onRefresh={loadSubscriptions}
+              refreshing={refreshing}
+            />
+          ) : (
+            <Empty>
+              <Icon name="event-busy" size={45} color="#fff" />
+              <EmptyText>Você não se inscreveu em um meetup</EmptyText>
+            </Empty>
+          ))}
+      </Container>
+    </Background>
+  );
+}
+
+Subscriptions.navigationOptions = {
+  tabBarLabel: 'Inscrições',
+  tabBarIcon: ({ tintColor }) => (
+    <Icon name="local-offer" size={30} color={tintColor} />
+  ),
+};
+
+export default withNavigationFocus(Subscriptions);
+
+// -----------------------------------------------------------------------------
+
+'styles,js' da 'Subscriptions':
+import styled from 'styled-components/native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
+export const Container = styled.SafeAreaView`
+  flex: 1;
+`;
+
+export const List = styled.FlatList.attrs({
+  showsVerticalScrollIndicator: false,
+})``;
+
+export const Empty = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+export const EmptyText = styled.Text`
+  font-size: 14px;
+  color: #fff;
+  margin-top: 15px;
+`;
+
+================================================================================
+
+Ir na 'routes.js' e adicionar o 'Subscriptions' no App: createBottomTabNavigator
+
+App: createBottomTabNavigator(
+  {
+    Dashboard,
+    Subscriptions,
+    Profile,
+  },
+
+================================================================================
+
+Alterar isso no 'user/sagas.js':
+
+export function* updateProfile({ payload }) {
+  try {
+    const { name, email, ...rest } = payload.data;
+
+    // Unir dois objetos, se existir o campo oldPassword, vai colocar dentro da variavel rest
+    // eslint-disable-next-line prefer-object-spread
+    const profile = {
+      name,
+      email,
+      ...(rest.oldPassword ? rest : {}),
+    };
+
+================================================================================
+
+ATUALIZACAO DE PERFIL e Logout da aplicacao
+
+CRIAR A PAGINA PROFILE, fazer a estilizacoes e ass funcoes
+
+criar o 'styles.js' na Pasta 'Profile'
+
+// -----------------------------------------------------------------------------
+
+'index.js' da 'Profile':
+import React, { useRef, useState, useEffect } from 'react';
+
+import { useSelector, useDispatch } from 'react-redux';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Background from '~/components/Background';
+import Header from '~/components/Header';
+
+import { updateProfileRequest } from '~/store/modules/user/actions';
+import { signOut } from '~/store/modules/auth/actions';
+
+import {
+  Container,
+  Form,
+  FormInput,
+  Divide,
+  SubmitButton,
+  LogoutButton,
+} from './styles';
+
+export default function Profile() {
+  const dispatch = useDispatch();
+  const profile = useSelector(state => state.user.profile);
+
+  const emailRef = useRef();
+  const oldPasswordRef = useRef();
+  const passwordRef = useRef();
+  const confirmPasswordRef = useRef();
+
+  const [name, setName] = useState(profile.name);
+  const [email, setEmail] = useState(profile.email);
+  const [oldPassword, setOldPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  useEffect(() => {
+    setOldPassword('');
+    setPassword('');
+    setConfirmPassword('');
+  }, [profile]);
+
+  function handleSubmit() {
+    dispatch(
+      updateProfileRequest({
+        name,
+        email,
+        oldPassword,
+        password,
+        confirmPassword,
+      })
+    );
+  }
+
+  function handleLogout() {
+    dispatch(signOut());
+  }
+
+  return (
+    <Background>
+      <Header />
+      <Container>
+        <Form>
+          <FormInput
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Nome Completo"
+            returnKeyType="next"
+            onSubmitEditing={() => emailRef.current.focus()} // Depois que editar vai focar no email
+            value={name}
+            onChangeText={setName}
+          />
+
+          <FormInput
+            keyboardType="email-address"
+            autoCorrect={false}
+            autoCapitalize="none"
+            placeholder="Digite seu e-mail"
+            ref={emailRef}
+            returnKeyType="next"
+            onSubmitEditing={() => oldPasswordRef.current.focus()} // Depois que editar vai focar no email
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <Divide />
+
+          <FormInput
+            secureTextEntry
+            placeholder="Sua senha atual"
+            ref={oldPasswordRef}
+            returnKeyType="send"
+            onSubmitEditing={() => passwordRef.current.focus()} // Depois que editar vai focar no email
+            value={oldPassword}
+            onChangeText={setOldPassword}
+          />
+
+          <FormInput
+            secureTextEntry
+            placeholder="Nova senha"
+            ref={passwordRef}
+            returnKeyType="send"
+            onSubmitEditing={() => confirmPasswordRef.current.focus()} // Depois que editar vai focar no email
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <FormInput
+            secureTextEntry
+            placeholder="Confirmação de senha"
+            ref={confirmPasswordRef}
+            returnKeyType="send"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+
+          <SubmitButton onPress={handleSubmit}>Salvar Perfil</SubmitButton>
+          <LogoutButton onPress={handleLogout}>Sair do Meetapp</LogoutButton>
+        </Form>
+      </Container>
+    </Background>
+  );
+}
+
+Profile.navigationOptions = {
+  tabBarLabel: 'Meu perfil',
+  tabBarIcon: ({ tintColor }) => (
+    <Icon name="person" size={30} color={tintColor} />
+  ),
+};
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da 'Profile':
+import { Platform } from 'react-native';
+import styled from 'styled-components/native';
+
+import Input from '~/components/Input';
+import Button from '~/components/Button';
+
+export const Container = styled.KeyboardAvoidingView.attrs({
+  enabled: Platform.OS === 'ios',
+  behavior: 'padding',
+})`
+  flex: 1;
+  padding: 0 30px;
+`;
+
+export const Form = styled.View`
+  align-self: stretch;
+`;
+
+export const FormInput = styled(Input)`
+  margin-bottom: 10px;
+`;
+
+export const SubmitButton = styled(Button)`
+  margin-top: 5px;
+`;
+
+export const LogoutButton = styled(Button)`
+  height: 42px;
+  margin-top: 20px;
+  background: #d44059;
+`;
+
+export const Divide = styled.View`
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 30px 0 20px;
+`;
+
+================================================================================
+APLICATIVO FINALIZADO
+================================================================================
+
+Agora fazer os testes, e colocar em producao

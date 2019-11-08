@@ -1,0 +1,484 @@
+TESTES NO NODEJS
+
+================================================================================
+
+CONFIGURANDO JEST - Teste pro NodeJS, React, ReactNative
+
+"yarn add jest -D"
+"yarn jest --init"
+y, node , y, y
+
+// -----------------------------------------------------------------------------
+
+Ir no 'jest.config.js':
+
+trocar o bail para 1, bail: 1 - assim que encontre uma falha ja para de executar o teste
+
+collectCoverage: true,
+collectCoverageFrom: ['src/app/**/*.js'],
+coverageDirectory: '__tests__/coverage', // Para criar a pasta coverage dentro de __tests__
+
+coverageReporters: ['text', 'lcov'],
+
+testMatch: ['**/__tests__/**/*.test.js'],
+
+criar na raiz a pasta '__tests__'
+
+// -----------------------------------------------------------------------------
+
+PARA UTILIZAR IMPORT E EXPORT:
+
+"yarn add --dev @sucrase/jest-plugin"
+
+voltar no 'jest.config.js': e colar esse transofrm
+
+ANTES:
+// A map from regular expressions to paths to transformers
+// transform: null,
+
+
+DEPOIS:
+// A map from regular expressions to paths to transformers
+transform: {
+  '.(js|jsx|ts|tsx)': '@sucrase/jest-plugin',
+},
+
+// -----------------------------------------------------------------------------
+
+Para o nodemon nao reiniciar o servidor
+
+'nodemon.json' adicionar um ignore
+{
+  "execMap": {
+    "js": "sucrase-node"
+  },
+  "ignore": ["__tests__"]
+}
+
+// -----------------------------------------------------------------------------
+
+Vai adicionar toda parte de Intellisense pro jest:
+"yarn add -D @types/jest"
+
+// -----------------------------------------------------------------------------
+
+Para o eslint nao reclamar do Jest:
+
+Ir no '.eslintrc.js' e adicionar o jest:
+env: {
+  es6: true,
+  node: true,
+  jest: true,
+},
+
+
+"yarn add -D eslint eslint-plugin-jest" - Acho que nao precisa
+
+// -----------------------------------------------------------------------------
+
+No '__tests__' criar o arquivo 'example.test.js'
+
+'example.test.js':
+function soma(a, b) {
+  return a + b;
+}
+
+test('if i call soma function with 4 and 5 it should return 9', () => {
+  const result = soma(4, 5);
+
+  expect(result).toBe(9);
+});
+
+// -----------------------------------------------------------------------------
+
+"yarn test" - Vai mostrar o teste no terminal
+
+================================================================================
+
+VARIAVEIS AMBIENTES PARA TESTE
+
+criar na raiz o arquivo '.env.test'
+
+'.env.test':
+APP_URL=http://localhost:3333
+NODE_ENV=development
+
+# Auth
+
+APP_SECRET=templatenoderocketseat
+
+# Database
+
+DB_DIALECT=sqlite
+
+// -----------------------------------------------------------------------------
+
+Ir no 'database.js' da pasta 'config'
+colocar o dialect assim: process.env.DB_DIALECT
+storage - o arquivo onde o banco sqlite vai ser salvo
+
+module.exports = {
+  dialect: process.env.DB_DIALECT || 'postgres',
+  host: process.env.DB_HOST,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  storage: './__tests__/database.sqlite',
+  define: {
+    timestamps: true,
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+// -----------------------------------------------------------------------------
+
+Na 'src' criar o arquivo 'bootstrap.js'
+const dotenv = require('dotenv');
+
+// Se for em ambiente de desenvolvimento
+dotenv.config({
+  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+});
+
+// -----------------------------------------------------------------------------
+
+Na 'app.js' da 'src', configurar o dotenv, tirando o import de inicio
+e importando o bootstrap.js que vai conter o dotenv
+
+import './bootstrap';
+
+import Youch from 'youch';
+import express from 'express';
+import 'express-async-errors';
+
+// -----------------------------------------------------------------------------
+
+Voltar no 'database.js' e alterar o dotenv dando o require no bootstrap
+
+require('../bootstrap');
+
+module.exports = {
+  dialect: process.env.DB_DIALECT || 'postgres',
+  host: process.env.DB_HOST,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  storage: './__tests__/database.sqlite',
+  define: {
+    timestamps: true,
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+// -----------------------------------------------------------------------------
+
+No 'package.json':
+adicionar o "NODE_ENV=test jest --detectOpenHandles --runInBand --forceExit" no test
+
+"scripts": {
+  "dev": "nodemon src/server.js",
+  "queue": "nodemon src/queue.js",
+  "test": "NODE_ENV=test jest --detectOpenHandles --runInBand --forceExit"
+},
+
+================================================================================
+
+'package.json':
+"pretest": "NODE_ENV=test sequelize db:migrate", - CRIAR
+"posttest": "NODE_ENV=test sequelize db:migrate:undo:all" - DESFAZER
+
+"scripts": {
+  "dev": "nodemon src/server.js",
+  "queue": "nodemon src/queue.js",
+  "pretest": "NODE_ENV=test sequelize db:migrate",
+  "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
+  "posttest": "NODE_ENV= test sequelize db:migrate:undo:all"
+},
+
+// -----------------------------------------------------------------------------
+
+"yarn add sqlite3 -D"
+"yarn test"
+
+// -----------------------------------------------------------------------------
+
+Na pasta '__tests__' criar a pasta 'integration' dentro o arquivo 'user.test.js'
+
+'integration/user.test.js'
+
+"yarn add supertest -D" - PARA USAR COMO SE FOSSE AXIOS, para fazer requisicoes
+
+// -----------------------------------------------------------------------------
+
+TESTE PARA VER SE E POSSIVEL SE REGISTRAR NA APLICACAO
+
+'user.test.js':
+import request from 'supertest';
+import app from '../../src/app';
+
+describe('User', () => {
+  it('should be able to register', async () => {
+    const response = await request(app) // Vai fazer uma requisicao para o app
+      .post('/users') // Vai ir na rota /users
+      .send({
+        name: 'Diego Fernandes',
+        email: 'diego@rocketseat.com.br',
+        password_hash: '1',
+      }); // Vai enviar os dados
+
+    // Pegar o conteudo da requisicao que esta dentro de response.body e ver dentro do response.body tem a propriedade chamada 'id'
+    expect(response.body).toHaveProperty('id');
+  });
+});
+
+================================================================================
+
+ELE VAI LIMPAR A BASE DE DADOS ANTES DE CADA TESTE
+
+Na pasta '__tests__' criar a pasta 'util' e dentro o arquivo 'truncate.js'
+
+'truncate.js':
+import database from '../../src/database';
+
+export default function truncate() {
+  return Promise.all(
+    Object.keys(database.connection.models).map(key => {
+      return database.connection.models[key].destroy({
+        truncate: true,
+        force: true,
+      });
+    })
+  );
+}
+
+// ta pegando todos os models e destruindo
+// truncate - forcar a exclusao de todos os registros da tabela
+// force - forcar remocao caso algum relacionamento esteja bloqueando
+
+// -----------------------------------------------------------------------------
+
+Importar o truncate no 'user.test.js':
+
+Executar o truncate antes de comecar cada um dos testes
+
+describe('User', () => {
+  // Executar o truncate antes de comecar cada um dos testes
+  beforeEach(async () => {
+    await truncate();
+  });
+});
+
+================================================================================
+
+VERIFICAR SE O EMAIL ESTA DUPLICADO
+
+it('should not be able to register with duplicated email', async () => {
+  // Criar o usuario duas vezes, para dar erro.
+  await request(app)
+    .post('/users')
+    .send({
+      name: 'Diego Fernandes',
+      email: 'diego@rocketseat.com.br',
+      password: '123456',
+    });
+
+  const response = await request(app)
+    .post('/users')
+    .send({
+      name: 'Diego Fernandes',
+      email: 'diego@rocketseat.com.br',
+      password: '123456',
+    });
+
+  expect(response.status).toBe(400);
+});
+
+================================================================================
+
+CRIPTOGRAFIA DE SENHA
+
+Verificar quando cria um usuario, a senha dele e criptograda e gera um hash.
+
+"yarn add bcryptjs"
+
+importar o bcrypt dentro do 'user.test.js':
+import bcrypt from 'bcryptjs';
+
+importar o model de User:
+import User from '../../src/app/models/User';
+
+// -----------------------------------------------------------------------------
+
+it('should encrypt user password when new user created', async () => {
+  const user = await User.create({
+    name: 'Diego Fernandes',
+    email: 'diego@rocketseat.com.br',
+    password: '123456',
+  });
+
+  const compareHash = await bcrypt.compare('123456', user.password_hash);
+
+  expect(compareHash).toBe(true);
+});
+
+// -----------------------------------------------------------------------------
+
+PARA TIRAR A CRIACAO E REMOCAO DE TABELA DO TERMINAL
+
+'database.js' da pasta 'config': colocar o logging: false
+
+'database.js':
+require('../bootstrap');
+
+module.exports = {
+  dialect: process.env.DB_DIALECT || 'postgres',
+  host: process.env.DB_HOST,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  storage: './__tests__/database.sqlite',
+  logging: false,
+  define: {
+    timestamps: true,
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+================================================================================
+
+GERANDO DADOS ALEATORIOS - DADOS FICTICIOS
+
+"yarn add factory-girl faker -D"
+
+Na pasta '__tests__' criar o arquivo 'factories.js':
+
+'factories.js':
+import faker from 'faker';
+import { factory } from 'factory-girl';
+
+import User from '../src/app/models/User';
+
+factory.define('User', User, {
+  name: faker.name.findName(),
+  email: faker.internet.email(),
+  password: faker.internet.password(),
+});
+
+export default factory;
+
+// -----------------------------------------------------------------------------
+
+Em vez de importar o model de User, importar o factory
+Trocar os dados que antes eram estaticos para os aleatorios com o factory
+
+No primeiro vai ser factory.create, ele cria um usuario dentro da base de dados
+e manter o password estatico, para fazer a comparacao de senha.
+
+No segundo vai ser uma variavel recebendo o attrs.
+Ele vai retornar apenas os atributos de usuario aleatorio
+
+'user.test.js':
+import request from 'supertest';
+import bcrypt from 'bcryptjs';
+import app from '../../src/app';
+
+import factory from '../factories';
+import truncate from '../util/truncate';
+
+describe('User', () => {
+  // Executar o truncate antes de comecar cada um dos testes
+  beforeEach(async () => {
+    await truncate();
+  });
+
+  it('should encrypt user password when new user created', async () => {
+    const user = await factory.create('User', {
+      password: '123456',
+    });
+
+    const compareHash = await bcrypt.compare('123456', user.password_hash);
+
+    expect(compareHash).toBe(true);
+  });
+
+  it('should be able to register', async () => {
+    const user = await factory.attrs('User');
+
+    const response = await request(app)
+      .post('/users')
+      .send(user);
+
+    expect(response.body).toHaveProperty('id');
+  });
+
+  it('should not be able to register with duplicated email', async () => {
+    const user = await factory.attrs('User');
+
+    // Criar o usuario duas vezes, para dar erro.
+    await request(app)
+      .post('/users')
+      .send(user);
+
+    const response = await request(app)
+      .post('/users')
+      .send(user);
+
+    expect(response.status).toBe(400);
+  });
+});
+
+================================================================================
+
+it('Should not permitted update meetup with different user then create meetup', async () => {
+    const user = await factory.attrs('User');
+
+    await request(app)
+      .post('/users')
+      .send(user);
+
+    const { body: sessionData } = await request(app)
+      .post('/sessions')
+      .send({ email: user.email, password: user.password });
+
+    const {
+      body: { id: banner_id },
+    } = await request(app)
+      .post('/upload/banner')
+      .set('Authorization', `Bearer ${sessionData.token}`)
+      .type('application/x-www-form-urlencoded')
+      .field('originalname', 'my awesome avatar')
+      .field('filename', 'avatar')
+      .attach('file', '__tests__/fixtures/google.jpg');
+
+    const meetup = await factory.attrs('Meetup', {
+      banner_id,
+    });
+
+    const meetupRes = await request(app)
+      .post('/meetups')
+      .set('Authorization', `Bearer ${sessionData.token}`)
+      .send(meetup);
+
+    // Usuario 2
+    const wrongUser = await factory.attrs('User');
+
+    await request(app)
+      .post('/users')
+      .send(wrongUser);
+
+    const { body: sessionData2 } = await request(app)
+      .post('/sessions')
+      .send({ email: wrongUser.email, password: wrongUser.password });
+
+    // Atualizar meetup
+    const response = await request(app)
+      .put(`/meetups/${meetupRes.body.id}`)
+      .set('Authorization', `Bearer ${sessionData2.token}`)
+      .send({ title: 'Atualizado' });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe('Not authorized');
+  });

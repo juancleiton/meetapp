@@ -1,0 +1,19 @@
+Testes no React Native
+
+"yarn add @testing-library/react-native -D"
+"yarn add @types/jest -D" (Para colocar o intelisense)
+
+No 'package.json':
+"jest": {
+  "preset": "@testing-library/react-native",
+  "testMatch": [
+    "**/__tests__/**/*.test.js"
+  ],
+  "collectCoverageFrom": [
+    "!src/services/api.js"
+  ],
+  "coverageDirectory": "__tests__/coverage",
+  "moduleNameMapper": {
+    "^~/(.*)": "<rootDir>/src/$1"
+  }
+}

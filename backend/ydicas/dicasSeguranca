@@ -1,0 +1,111 @@
+================================================================================
+
+SEGURANCA NO Node.JS
+
+================================================================================
+
+UTILIZANDO EXPRESS BRUTE
+
+"yarn add express-brute express-brute-redis";
+Limitar tentativa de acessar uma rota
+
+// -----------------------------------------------------------------------------
+
+'Routes.js':
+import Brute from 'express-brute';
+import BruteRedis from 'express-brute-redis';
+
+const bruteStore = new BruteRedis({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+});
+
+const bruteForce = new Brute(bruteStore);
+
+Colocar o bruteForce nas rotas que eu quero que ele limite
+
+routes.post('/sessions', bruteForce.prevent, SessionController.store);
+
+Testar no insomnia
+
+================================================================================
+
+UTILIZANDO HELMET - Adicionar mais headers de seguranca na rota.
+
+"yarn add helmet"
+
+Ir no "app.js": importar o helmet
+import helmet from 'helmet';
+
+E colocar dentro dos middlewares:
+middlewares() {
+  this.server.use(Sentry.Handlers.requestHandler());
+  this.server.use(helmet());
+}
+
+================================================================================
+
+UTILIZANDO RATE LIMIT - Limita acessos na rota de toda aplicacao
+Como se fosse o Brute mas serve para toda a aplicacao, nao so para uma rota
+
+"yarn add express-rate-limit redis"
+"yarn add rate-limit-redis"
+
+Ir no "app.js": importar
+import redis from 'redis';
+import RateLimit from 'express-rate-limit';
+import RateLimitRedis from 'rate-limit-redis';
+
+e dentro dos middlewares configurar o RateLimit:
+
+middlewares() {
+  this.server.use(Sentry.Handlers.requestHandler());
+  this.server.use(helmet());
+  this.server.use(cors());
+  this.server.use(express.json());
+  this.server.use(
+    '/files',
+    express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+  );
+
+  // Para ser usado sem ser em desenvolvimento
+  if (process.env.NODE_ENV !== 'development') {
+    this.server.use(
+      new RateLimit({
+        store: new RateLimitRedis({
+          client: redis.createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+          }),
+        }),
+        windowMs: 1000 * 60 * 15, // Tempo
+        max: 10, // Quantidade maxima de tentativas
+      })
+    );
+  }
+}
+
+================================================================================
+
+UTILIZANDO CORS
+
+Bloquea so frontend, nao vai evitar que acesse a api pelo insomnia por exemplo
+
+criar no '.env'
+
+FRONT_URL=https://frontdoalan.com
+
+no 'app.js':
+this.server.use(
+  cors({
+    origin: process.env.FRONT_URL,
+  })
+);
+
+================================================================================
+
+Github e GreenKeeper
+
+Vai atualizar ass dependencias
+
+Precisar ter os processos de CI e os testes

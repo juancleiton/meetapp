@@ -1,0 +1,356 @@
+================================================================================
+
+DEPLOY NO NODEJS
+
+================================================================================
+
+SSH
+Ir no terminal:
+.ssh
+cat id_rsa.pub
+
+================================================================================
+
+pega o ip no digital ocean
+abrir o terminal
+ssh root@165.227.107.17
+yes
+apt update
+apt upgrade
+Y
+adduser deploy
+senha: senhasecreta
+Nao preenchi nada
+Y
+usermod -aG sudo deploy
+cd /home/deploy/
+mkdir .ssh
+cd .ssh/
+cp ~/.ssh/authorized_keys .
+ls
+chown deploy:deploy authorized_keys
+exit
+ssh deploy@165.227.107.17
+
+// sudo da o poder de root
+
+================================================================================
+
+Instalar o node e o npm
+
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+senha: senhasecreta
+sudo apt-get install -y nodejs
+node -v
+npm -v
+
+================================================================================
+
+CLONANDO APLICACAO
+
+git clone https://github.com/AlanCoosta/Meetapp app
+
+cd app/
+npm install
+ls
+cp .env.example .env
+vim .env
+
+apertar a tecla "insert" para editar
+
+NODE_ENV=production
+
+copiar o ipv4 
+165.227.107.17 e colocar no lugar de localhost
+:wq
+
+================================================================================
+
+CRIANDO SERVICOS DE BANCO DE DADOS
+
+Configurando os servicos de banco de dados
+
+docker -v
+docker ps
+sudo groupadd docker
+e colocar a senha
+
+sudo usermod -aG docker $USER
+
+exit
+
+Logar denovo:
+ssh deploy@165.227.107.17
+
+docker ps
+
+cd app/
+
+** Essa parte pode dar erro ** por causa das portas usadas no aplicativo
+
+docker run --name postgres -e POSTGRES_PASSWORD=bootcampdeploy -p 5432:5432 -d -t postgres
+
+docker run --name mongo -p 27017:27017 -d -t mongo
+
+docker run --name redis -p 6379:6379 -d -t redis:alpine
+
+para ver se ta rodando
+docker ps
+
+================================================================================
+
+CONFIGURARN AS VARIAVEIS AMBIENTES
+
+vim .env
+
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASS=bootcampdeploy
+DB_NAME=bootcampnodejs
+
+# Mongo
+
+MONGO_URL=mongodb://localhost:27017/bootcampnodejs
+
+ctrl+c
+:wq
+
+docker exec -i -t postgres /bin/sh
+su postgres
+psql
+\dt
+
+CREATE DATABASE bootcampnodejs;
+\q (para sair)
+exit
+exit
+
+Banco de dados criado!
+
+vim package.json
+
+================================================================================
+
+Editar no projeto da API
+
+Criar o 'build' e 'start'
+
+no arquivo "package.json" na parte de scripts adicionar:
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "queue": "nodemon src/queue.js",
+    "build": "sucrase ./src -d ./dist --transforms imports",
+    "start": "node dist/server.js"
+  },
+
+yarn build
+
+ls
+cd dist
+ls
+code server.js (para ver se ja ta diferente com a sintaxe de require)
+
+cd ..
+yarn start
+
+
+Ir na arquivo '.gitignore'
+e adicionar a pasta dist:
+
+node_modules
+dist
+.env
+
+git status
+git add . (adiciona tudo)
+git commit -m "Ajustes para deploy"
+git push
+
+
+ssh deploy@165.227.107.17 (para conectar ao servidor)
+
+cd app
+git pull
+
+npm install (Se der erro)
+npm run build
+npm run start
+
+================================================================================
+
+Copiar o Ip la do DigitalOcean
+abrir o insomnia
+Ir no Manage Environments
+trocar o localhost pelo o ip
+
+{
+  "base_url": "http://165.227.107.17:3333",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiaWF0IjoxNTY5NDQzNzA5LCJleHAiOjE1NzAwNDg1MDl9.xv1KprCDQyPUEavl6oQDoxrcVQT0AUxBskzmjq9rsS8"
+}
+
+Abrir a porta '3333' para acesso externo:
+sudo ufw allow 3333
+
+npx sequelize db:migrate
+npm run start
+
+E tentar criar um usuario
+Ir no Create do Users
+
+criar o usuario e depois fazer o login na parte session
+
+================================================================================
+
+Dicas do SSH
+
+ssh deploy@165.227.107.17
+
+lsof -i :3333 (Descobrir todos os processos rodando)
+kill -9 (PID) (Mata o processo)
+
+
+sudo vim /etc/ssh/sshd_config
+
+insert
+No final do arquivo colar:
+
+ClientAliveInterval 30
+TCPKeepAlive yes
+ClientAliveCountMax 99999
+
+ctrl + c
+:wq
+
+sudo service sshd restart
+exit
+
+ssh deploy@165.227.107.17
+
+================================================================================
+
+Configurando NGINX (fazer com a aplicacao rode na porta 80 e nao na 3333)
+
+cd app
+
+sudo apt install nginx
+senha: senhasecreta
+Y
+
+sudo ufw allow 80 (para permitir acessar) 165.227.107.17
+
+Redirecionar para a porta 3333, onde vai ta rodando a nossa aplicacao node
+
+
+sudo vim /etc/nginx/sites-available/default - Vamos editar esse arquivo
+
+// -----------------------------------------------------------------------------
+
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+
+        server_name _;
+
+        location / {
+                proxy_pass http://localhost:3333;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+        }
+
+
+}
+
+// -----------------------------------------------------------------------------
+
+ctrl+c
+:wq
+
+
+sudo service nginx restart
+senha: 
+sudo nginx -t (Para verificar se ta tudo certo)
+
+npm run start (dentro do app)
+
+E la no insomnia no Manage Environments tirar a porta 3333
+{
+  "base_url": "http://165.227.107.17",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiaWF0IjoxNTY5NDQzNzA5LCJleHAiOjE1NzAwNDg1MDl9.xv1KprCDQyPUEavl6oQDoxrcVQT0AUxBskzmjq9rsS8"
+}
+
+Dar um login na Sessions
+E ja pode ver que conseguimos usar a aplicacao sem a porta 3333
+
+Configurar o endereco de ip de uma forma muito simples
+Na parte "Networking"
+Enter domain
+apontar os DNS pra dentro dos servidores da Digital Ocean
+E tal dominio vai apontar para tal servidor
+
+================================================================================
+
+Utilizando PM2 (nossa aplicacao rodar pra sempre)
+Manter nossa aplicacao rodando independente se o servidor eh fechado se ele reinicia
+
+sudo npm install -g pm2
+
+pm2 start dist/server.js
+pm2 list
+pm2 startup systemd
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u deploy --hp /home/deploy
+pm2 list
+pm2 monit
+
+================================================================================
+
+INTEGRACAO CONTINUA - Quando fazer um commit, alterar automaticamente
+
+buddy.works (site)
+fazer todo a configuracao que e basica:
+Onpush
+digitalocean
+Login: deploy
+Autentication mode: Buddy ssh key (pegar o codigo e colar no terminar do servidor no usuario deploy, nao root)
+Remote path: ~/app
+
+no site do buddy works rodar no terminal do site
+
+npm install
+npm run build
+npx sequelize db:migrate
+pm2 restart server
+
+165.227.107.17
+deploy
+Buddy's SSH Key
+~/app
+
+
+clicar no botao de adicionar mais uma action
+Notifications
+Email
+Tudo certo com a build
+Recipients: alancoosta2323@gmail.com
+
+================================================================================
+
+Dar um,novo commit no nosso codigo!
+Ir no codigo
+
+Em routes
+adicionar
+routes.get('/', (req, res) => res.send('ok'));
+
+
+DA PASTA SRC, nao da pasta DIST SEU BURRO
+
+git add .
+git commit -m "Cria rota de teste"
+git push
+
+ver se recebeu o email
+e depois entrar no site 165.227.107.17 e ver a mensagem de ok

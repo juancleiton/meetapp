@@ -1,0 +1,3467 @@
+"yarn create react-app frontend"
+
+Apagar 'App.css', 'App.test.js', 'index.css', 'logo.svg', 'serviceWorker.js'
+e tudo que estiver eles nos outros arquivos.
+
+Configurar Eslint, Prettier e EditorConfig
+.prettierrc
+
+================================================================================
+
+Criar um EditorConfig e configurar:
+root = true
+
+[*]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+================================================================================
+
+yarn add eslint -D
+yarn eslint --init
+apagar o package.lock.json
+yarn
+yarn add @babel/core @babel/preset-env @babel/preset-react webpack webpack-cli -D
+yarn add prettier eslint-config-prettier eslint-plugin-prettier babel-eslint -D
+yarn add babel-eslint@10.0.3 -D
+yarn add webpack@4.41.0 -D
+
+yarn
+
+================================================================================
+
+'.eslintrc.js':
+module.exports = {
+  env: {
+    es6: true,
+    jest: true,
+    browser: true
+  },
+  extends: ["airbnb", "prettier", "prettier/react"],
+  globals: {
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
+    __DEV__: true
+  },
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true
+    },
+    ecmaVersion: 2018,
+    sourceType: "module"
+  },
+  plugins: ["react", "jsx-a11y", "import", "react-hooks", "prettier"],
+  rules: {
+    "prettier/prettier": "error",
+    "react/jsx-filename-extension": ["error", { extensions: [".js", ".jsx"] }],
+    "import/prefer-default-export": "off",
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "react/jsx-one-expression-per-line": "off",
+    "global-require": "off",
+    "react-native/no-raw-text": "off",
+    "no-param-reassign": "off",
+    "no-underscore-dangle": "off",
+    camelcase: "off",
+    "no-console": ["error", { allow: ["tron"] }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  // settings: {
+  //   "import/resolver": {
+  //     "babel-plugin-root-import": {
+  //       rootPathSuffix: "src"
+  //     }
+  //   }
+  // }
+};
+
+Criar o arquivo: '.prettierrc':
+{
+  "singleQuote": true,
+  "trailingComma": "es5"
+}
+
+depois apagar o negocio nos arquivos.
+yarn start (para testar)
+
+================================================================================
+
+Ajustes na API (backend)
+Abrir o projeto da API
+
+"yarn add cors"
+permite que outras aplicacoes acessar a API, e eu posso definir tambem quem pode acessar
+
+ir na 'app.js': importar o cors
+import 'dotenv/config';
+
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import Youch from 'youch';
+
+
+middlewares() {
+  this.server.use(Sentry.Handlers.requestHandler());
+  this.server.use(cors()); // ou em producao this.server.use(cors({ origin: 'https://rocketseat.com.br' }));
+  this.server.use(express.json());
+  this.server.use(
+    '/files',
+    express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+  );
+}
+
+================================================================================
+
+CONFIGURANDO ROTAS
+
+yarn add react-router-dom
+
+Criar na 'src' 3 pastas, 'pages', 'routes', 'services'
+
+Dentro da 'pages' criar pastas 'Dashboard', 'Profile', 'SignIn', 'SingUp',
+'NewEditMeetup', 'DetailsMeetup'
+cada uma com um 'index.js' dentro:
+
+import React from 'react';
+
+export default function Dashboard() {
+  return (
+    <div>
+      <h1>Dashboard</h1>
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+Dentro da 'routes' criar 'index.js':
+
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
+
+import SignIn from '../pages/SignIn';
+import SignUp from '../pages/SignUp';
+
+import Dashboard from '../pages/Dashboard';
+import Profile from '../pages/Profile';
+
+import DetailsMeetup from '../pages/DetailsMeetup';
+import NewEditMeetup from '../pages/NewEditMeetup';
+
+export default function Routes() {
+  return (
+    <Switch>
+      <Route path="/" exact component={SignIn} />
+      <Route path="/register" exact component={SignUp} />
+
+      <Route path="/dashboard" exact component={Dashboard} />
+      <Route path="/profile" exact component={Profile} />
+
+      <Route path="/details/:id" exact component={DetailsMeetup} />
+      <Route path="/newedit" exact component={NewEditMeetup} />
+    </Switch>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+
+yarn add history(Para mudar de pagina algo assim)
+
+Dentro da 'services' criar 'history.js':
+
+import { createBrowserHistory } from 'history';
+
+const history = createBrowserHistory();
+
+export default history;
+
+// -----------------------------------------------------------------------------
+
+Ir no 'App.js':
+
+import React from 'react';
+import { Router } from 'react-router-dom';
+
+import Routes from './routes';
+import history from './services/history';
+
+function App() {
+  return (
+    <Router history={history}>
+      <Routes />
+    </Router>
+  );
+}
+
+export default App;
+
+================================================================================
+
+CONFIGURANDO O REACTOTRON
+
+"yarn add reactotron-react-js"
+
+Criar na 'src', a pasta 'config' e dentro 'ReactotronConfig.js'
+import Reactotron from 'reactotron-react-js';
+
+if (process.env.NODE_ENV === 'development') {
+  const tron = Reactotron.configure().connect();
+
+  tron.clear();
+
+  console.tron = tron;
+}
+
+// -----------------------------------------------------------------------------
+
+ir no 'App.js':	importar o reactotron no app 'App.js'
+import './config/ReactotronConfig';
+
+
+import React from 'react';
+import { Router } from 'react-router-dom';
+
+import './config/ReactotronConfig';
+
+import Routes from './routes';
+import history from './services/history';
+
+// -----------------------------------------------------------------------------
+yarn start
+abrir o reactotron
+
+================================================================================
+
+ROTAS PRIVADAS
+
+Na pasta 'routes' criar o arquivo 'Route.js':
+
+Na 'index.js' da pasta 'routes' colocar assim:
+<Route path="/dashboard" component={Dashboard} isPrivate />
+<Route path="/profile" component={Profile} isPrivate />
+
+"yarn add prop-types"
+
+'Route.js':
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Route, Redirect } from 'react-router-dom';
+
+export default function RouteWrapper({
+  component: Component,
+  isPrivate,
+  ...rest
+}) {
+  // false = Nao ta logado. true = ta logado.
+  const signed = false;
+
+  // Se o usuario nao estiver logado e a propriedade isPrivate for igual a true
+  // isPrivate e rota onde ele precisa ta logado, ta la no 'index' as rotas privadas
+  if (!signed && isPrivate) {
+    return <Redirect to="/" />;
+  }
+
+  // Se estiver logado e a rota nao for privada, redireciona para o dashboard
+  // Ta logado. ja estou logado me redireciona pra dashboard
+  if (signed && !isPrivate) {
+    return <Redirect to="/dashboard" />;
+  }
+
+  return <Route {...rest} component={Component} />;
+}
+
+RouteWrapper.propTypes = {
+  isPrivate: PropTypes.bool,
+  component: PropTypes.oneOfType([PropTypes.element, PropTypes.func])
+    .isRequired,
+};
+
+RouteWrapper.defaultProps = {
+  isPrivate: false,
+};
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'routes': importar o Route separado do switch
+import React from 'react';
+
+import { Switch } from 'react-router-dom';
+import Route from './Route';
+
+================================================================================
+
+LAYOUTS POR PAGINA
+
+yarn add styled-components
+
+Criar na pasta 'pages' a pasta '_layouts'
+
+Criar na pasta '_layouts' a pasta 'auth' e 'default'
+e dentro de cada uma 'index.js' e 'styles.js'
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'auth':
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import { Wrapper } from './styles';
+
+// Aqui vai pegando todas as propriedades da pagina
+export default function AuthLayout({ children }) {
+  return <Wrapper>{children}</Wrapper>;
+}
+
+AuthLayout.propTypes = {
+  children: PropTypes.element.isRequired,
+};
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'auth':
+import styled from 'styled-components';
+
+export const Wrapper = styled.div`
+  height: 100%;
+  background: linear-gradient(#22202C, #402845);
+`;
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'default':
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import { Wrapper } from './styles';
+
+export default function DefaultLayout({ children }) {
+  return <Wrapper>{children}</Wrapper>;
+}
+
+DefaultLayout.propTypes = {
+  children: PropTypes.element.isRequired,
+};
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'default':
+import styled from 'styled-components';
+
+export const Wrapper = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(#22202C, #402845);
+`;
+
+// -----------------------------------------------------------------------------
+Agora importar na 'Routes.js':
+
+Se o usuario estiver logado vai ter o layout da dashboard, se nao o do auth
+Dai renderiza o layout dentro do <Route />
+
+Ir na 'Route.js' e importar o auth e default layout
+import AuthLayout from '../pages/_layouts/auth';
+import DefaultLayout from '../pages/_layouts/default';
+
+
+if (signed && !isPrivate) {
+  return <Redirect to="/dashboard" />;
+}
+
+// Se ele estiver logado chama o DefaultLayout, se nao vai para o AuthLayout, e consequetemente para se autenticar
+const Layout = signed ? DefaultLayout : AuthLayout;
+
+return (
+  <Route
+    {...rest}
+    render={props => ( // props recebe todas as propriedades da tela
+      <Layout>
+        <Component {...props} />
+      </Layout>
+    )}
+  />
+);
+
+================================================================================
+
+ESTILOS GLOBAIS
+
+Criar uma pasta na 'src' chamada 'styles' e dentro o 'global.js'
+
+'global.js':
+import { createGlobalStyle } from 'styled-components';
+
+// Font Roboto
+export default createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    box-sizing: border-box;
+  }
+
+  *:focus {
+    outline: 0;
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body, input, button {
+    font: 14px 'Roboto', sans-serif;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+`;
+
+
+// -----------------------------------------------------------------------------
+
+Ir no 'App.js': importar o GlobalStyle e colocar dentro do Router
+
+import React from 'react';
+import { Router } from 'react-router-dom';
+
+import './config/ReactotronConfig';
+
+import Routes from './routes';
+import history from './services/history';
+
+import GlobalStyle from './styles/global';
+
+function App() {
+  return (
+    <Router history={history}>
+      <Routes />
+      <GlobalStyle />
+    </Router>
+  );
+}
+
+export default App;
+
+================================================================================
+
+UTILIZANDO ROOT IMPORT (" ~ " = src)
+
+"yarn add customize-cra react-app-rewired -D"
+"yarn add babel-plugin-root-import -D"
+
+Criar na raiz o arquivo 'config-overrides.js'
+
+'config-overrides.js':
+const { addBabelPlugin, override } = require('customize-cra');
+
+module.exports = override(
+  addBabelPlugin([
+    'babel-plugin-root-import',
+    {
+      rootPathSuffix: 'src',
+    },
+  ])
+);
+
+// -----------------------------------------------------------------------------
+
+Ir no 'package.json' trocar por react-app-rewired
+
+'package.json':
+"scripts": {
+  "start": "react-app-rewired start",
+  "build": "react-app-rewired build",
+  "test": "react-app-rewired test",
+  "eject": "react-scripts eject"
+},
+
+Para o eslint para de reclamar com o '~'
+"yarn add eslint-import-resolver-babel-plugin-root-import -D"
+
+Ir no '.eslintrc.js':
+settings: {
+  "import/resolver": {
+    "babel-plugin-root-import": {
+      rootPathSuffix: "src"
+    }
+  }
+}
+
+Depois criar na raiz o arquivo 'jsconfig.json'
+
+'jsconfig.json':
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "~/*": ["*"]
+    }
+  }
+}
+
+e mudar nos arquivos para '~'
+
+reiniciar o servidor
+yarn start
+
+================================================================================
+
+SIGN IN
+
+ESTILIZACAO NA PAGINA DE AUTENTICACAO - SignIn
+
+Usar o Figma para fazer a previa
+
+Na 'src' criar a pasta 'assets' e colocar o arquivo 'svg' dentro
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignIn'
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+import logo from '~/assets/logo.svg';
+
+export default function SignIn() {
+  return (
+    <>
+      <img src={logo} alt="Logo MeetApp" />
+
+      <form action="">
+        <input type="email" placeholder="Digite seu e-mail" />
+        <input type="password" placeholder="Sua senha secreta" />
+
+        <button type="submit">Entrar</button>
+        <Link to="/register">Criar conta grátis</Link>
+      </form>
+    </>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+Como a estilizacao do SignIn e SignUp serao iguais
+Ir no '_layouts/auth/styles.js', e deixar aas configuracoes la
+Porque sao paginas que tem o padrao auth
+
+// -----------------------------------------------------------------------------
+
+Mudar o '_layouts/auth/index.js'
+
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import { Wrapper, Content } from './styles';
+
+export default function AuthLayout({ children }) {
+  return (
+    <Wrapper>
+      <Content>{children}</Content>
+    </Wrapper>
+  );
+}
+
+AuthLayout.propTypes = {
+  children: PropTypes.element.isRequired,
+};
+
+// Content esta recebendo dentro de children,
+// as paginas que tem o tipo AuthLayout
+// SignIn e SignUp, que foram definido em 'Route.js'
+
+// -----------------------------------------------------------------------------
+
+usar a lib polished, para dar efeito de hover
+"yarn add polished"
+
+import { darken } from 'polished';
+background: ${darken(0.03, '#3b93ff')};
+
+// -----------------------------------------------------------------------------
+
+'_layouts/auth/styles.js':
+
+import styled from 'styled-components';
+import { darken } from 'polished';
+
+export const Wrapper = styled.div`
+  height: 100%;
+  background: linear-gradient(#22202c, #402845);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const Content = styled.div`
+  width: 100%;
+  max-width: 315px;
+  text-align: center;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+
+    input {
+      background: rgba(0, 0, 0, 0.1);
+      border: 0;
+      border-radius: 4px;
+      height: 50px;
+      padding: 0 15px;
+      color: #fff;
+      margin: 0 0 10px;
+    }
+
+    button {
+      margin: 5px 0 0;
+      height: 50px;
+      background: #f94d6a;
+      color: #fff;
+      border: 0;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: 0.2s;
+
+      &:hover {
+        background: ${darken(0.03, '#f94d6a')};
+      }
+    }
+
+    a {
+      color: #fff;
+      margin-top: 15px;
+      font-size: 16px;
+      opacity: 0.8;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+`;
+
+================================================================================
+
+SIGN UP
+
+ESTILIZACAO NA PAGINA DE AUTENTICACAO - SignUp
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+import logo from '~/assets/logo.svg';
+
+export default function SignUp() {
+  return (
+    <>
+      <img src={logo} alt="Logo MeetApp" />
+
+      <form action="">
+        <input type="name" placeholder="Nome completo" />
+        <input type="email" placeholder="Digite seu e-mail" />
+        <input type="password" placeholder="Sua senha secreta" />
+
+        <button type="submit">Entrar</button>
+        <Link to="/">Já tenho um login</Link>
+      </form>
+    </>
+  );
+}
+
+================================================================================
+
+UTILIZANDO UNFORM
+
+para armazenar e recuperar informacao do input ou form
+
+"yarn add @rocketseat/unform"
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignIn':
+importar o form e input do unform e substituir no return
+tem que dar um name para o Input
+
+e criar uma functionn para testar no console do Reactotron quando der o submit
+no formulario
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Form, Input } from '@rocketseat/unform';
+
+import logo from '~/assets/logo.svg';
+
+export default function SignIn() {
+  function handleSubmit(data) {
+    console.tron.log(data);
+  }
+
+  return (
+    <>
+      <img src={logo} alt="MeetApp" />
+
+      <Form onSubmit={handleSubmit}>
+        <Input name="email" type="email" placeholder="Digite seu e-mail" />
+        <Input
+          name="password"
+          type="password"
+          placeholder="Sua senha secreta"
+        />
+
+        <button type="submit">Entrar</button>
+        <Link to="/register">Criar conta grátis</Link>
+      </Form>
+    </>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+PARA DAR UM CONSOLE LOG NO REACTOTRON
+console.tron.log(data);
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignUp':
+importar o form e input do unform e substituir no return
+tem que dar um name para o Input
+
+e criar uma functionn para testar no console do Reactotron quando der o submit no formulario
+
+Ir no 'index.js' da pasta 'SignUp':
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Form, Input } from '@rocketseat/unform';
+
+import logo from '~/assets/logo.svg';
+
+export default function SignUp() {
+  function handleSubmit(data) {
+    console.tron.log(data);
+  }
+
+  return (
+    <>
+      <img src={logo} alt="GoBarber" />
+
+      <Form onSubmit={handleSubmit}>
+        <Input name="name" placeholder="Nome Completo" />
+        <Input name="email" type="email" placeholder="Seu e-mail" />
+        <Input
+          name="password"
+          type="password"
+          placeholder="Sua senha secreta"
+        />
+
+        <button type="submit">Criar conta</button>
+        <Link to="/">Ja tenho login</Link>
+      </Form>
+    </>
+  );
+}
+
+================================================================================
+
+VALIDACOES com o Yup
+
+yarn add yup
+
+adicionar o Yup e colocar o schema dentro do form,
+ai ele vai ver se existe os campos
+
+Ir no 'index.js' da pasta 'SignIn': importar o Yup
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Form, Input } from '@rocketseat/unform';
+import * as Yup from 'yup';
+
+import logo from '~/assets/logo.svg';
+
+const schema = Yup.object().shape({
+  email: Yup.string()
+    .email('Insira um e-mail válido')
+    .required('O e-mail é obrigatório'),
+  password: Yup.string().required('A senha é obrigatória'),
+});
+
+export default function SignIn() {
+  function handleSubmit(data) {
+    console.tron.log(data); // Quando dispara esse submit, mostra o console la no Reactotron
+  }
+
+  return (
+    <>
+      <img src={logo} alt="MeetApp" />
+
+      <Form schema={schema} onSubmit={handleSubmit}>
+        <Input name="email" type="email" placeholder="Digite seu e-mail" />
+        <Input
+          name="password"
+          type="password"
+          placeholder="Sua senha secreta"
+        />
+
+        <button type="submit">Entrar</button>
+        <Link to="/register">Criar conta grátis</Link>
+      </Form>
+    </>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+ESTILIZAR O SPAN DO YUP QUANDO DA O AVISO
+
+Ir no 'styles.js' da pasta '_layouts/auth': colocar abaixo do input:
+o erro do yup cria um span
+
+input{..}
+
+span {
+  color: #fb6f91;
+  align-self: flex-start;
+  margin: 0 0 10px;
+  font-weight: bold;
+}
+
+button{..}
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignUp':
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Form, Input } from '@rocketseat/unform';
+import * as Yup from 'yup';
+
+import logo from '~/assets/logo.svg';
+
+const schema = Yup.object().shape({
+  name: Yup.string().required('O nome é obrigatório'),
+  email: Yup.string()
+    .email('Insira um e-mail válido')
+    .required('O e-mail é obrigatório'),
+  password: Yup.string()
+    .min(6, 'No mínimo 6 carcteres')
+    .required('A senha é obrigatória'),
+});
+
+export default function SignUp() {
+  function handleSubmit(data) {
+    console.tron.log(data); // Quando dispara esse submit, mostra o console la no Reactotron
+  }
+
+  return (
+    <>
+      <img src={logo} alt="MeetApp" />
+
+      <Form schema={schema} onSubmit={handleSubmit}>
+        <Input name="name" type="name" placeholder="Nome completo" />
+        <Input name="email" type="email" placeholder="Digite seu e-mail" />
+        <Input
+          name="password"
+          type="password"
+          placeholder="Sua senha secreta"
+        />
+
+        <button type="submit">Entrar</button>
+        <Link to="/">Já tenho um login</Link>
+      </Form>
+    </>
+  );
+}
+
+================================================================================
+
+CONFIGURANDO O STORE
+
+Manter a autenticacao do usuario no Redux, e todo tipo de informacao que a
+aplicacao toda tem que manter
+
+immer - criar um estado IMUTAVEL
+
+"yarn add redux redux-saga react-redux reactotron-redux reactotron-redux-saga immer"
+
+Na pasta 'src' criar a pasta 'store' e dentro 'index.js'
+Dentro da pasta 'store' criar a pasta 'modules'
+Dentro de 'modules', criar a pasta'auth' e dentro 'actions.js', 'reducer.js', 'sagas.js'
+e dentro da pasta 'modules', criar o arquivo 'rootReducer.js' e 'rootSaga.js'
+
+'src/store/index.js'
+'src/store/modules/auth/reducer.js, actions.js, sagas.js'
+'src/store/modules/rootReducer.js, rootSaga.js'
+
+
+OUVIR ACTION PARA DISPARAR SAGAS
+
+// -----------------------------------------------------------------------------
+
+'reducer.js':
+const INITIAL_STATE = {};
+
+export default function auth(state = INITIAL_STATE, action) {
+  switch (action.type) {
+    default:
+      return state;
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+'sagas.js':
+import { all } from 'redux-saga/effects';
+
+export default all([]);
+
+// -----------------------------------------------------------------------------
+
+'rootReducer.js': VAI UNIR TODOS OS REDUCERS DOS MODULOS - auth e user
+import { combineReducers } from 'redux';
+
+import auth from './auth/reducer';
+
+export default combineReducers({
+  auth,
+});
+
+// -----------------------------------------------------------------------------
+
+'rootSaga.js': VAI UNIR TODOS OS SAGAS DOS MODULOS - auth e user
+import { all } from 'redux-saga/effects';
+
+import auth from './auth/sagas';
+
+export default function* rootSaga() {
+  return yield all([auth]);
+}
+
+// -----------------------------------------------------------------------------
+
+Configuracao do Redux
+
+Na pasta 'store' criar o arquivo 'createStore.js'
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'store':
+
+import createSagaMiddleware from 'redux-saga';
+import createStore from './createStore';
+
+import rootReducer from './modules/rootReducer';
+import rootSaga from './modules/rootSaga';
+
+const sagaMiddleware = createSagaMiddleware();
+
+const middlewares = [sagaMiddleware];
+
+const store = createStore(rootReducer, middlewares);
+
+sagaMiddleware.run(rootSaga);
+
+export default store;
+
+// -----------------------------------------------------------------------------
+
+VAI CRIAR UM STORE NO REDUX E DEPOIS FAZER INTEGRACAO COM O REACTOTRON
+
+'createStore.js' da pasta 'store':
+import { createStore } from 'redux';
+
+export default (reducers, middlewares) => {
+  return createStore(reducers, middlewares);
+};
+
+// -----------------------------------------------------------------------------
+
+Ir no 'ReactotronConfig.js' da pasta 'config':
+importar o reactotronRedux e reactotronSaga
+
+import Reactotron from 'reactotron-react-js';
+import { reactotronRedux } from 'reactotron-redux';
+import reactotronSaga from 'reactotron-redux-saga';
+
+if (process.env.NODE_ENV === 'development') {
+  const tron = Reactotron.configure()
+    .use(reactotronRedux())
+    .use(reactotronSaga())
+    .connect();
+
+  tron.clear();
+
+  console.tron = tron;
+}
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'store': Passar o SagaMonitor em ambiente de desenvolvimento,
+para monitorar o saga
+E passar dentro do createSagaMiddleware
+
+import createSagaMiddleware from 'redux-saga';
+import createStore from './createStore';
+
+import rootReducer from './modules/rootReducer';
+import rootSaga from './modules/rootSaga';
+
+const sagaMonitor =
+  process.env.NODE_ENV === 'development'
+    ? console.tron.createSagaMonitor()
+    : null;
+
+const sagaMiddleware = createSagaMiddleware({ sagaMonitor });
+
+const middlewares = [sagaMiddleware];
+
+const store = createStore(rootReducer, middlewares);
+
+sagaMiddleware.run(rootSaga);
+
+export default store;
+
+// -----------------------------------------------------------------------------
+
+'createStore.js' da pasta 'store':
+import { createStore, compose, applyMiddleware } from 'redux';
+
+export default (reducers, middlewares) => {
+  const enhancer =
+    process.env.NODE_ENV === 'development'
+      ? compose(
+          console.tron.createEnhancer(),
+          applyMiddleware(...middlewares)
+        )
+      : applyMiddleware(...middlewares);
+
+  return createStore(reducers, enhancer);
+};
+
+// -----------------------------------------------------------------------------
+
+Ir no 'App.js'
+importar o provider e o  store
+
+colocar o provider por volta de tudo e com ele o store
+import store from './store';
+
+'App.js':
+import React from 'react';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+
+import './config/ReactotronConfig';
+
+import Routes from './routes';
+import history from './services/history';
+
+import store from './store'; // Onde esta todo os red,act,sag
+
+import GlobalStyle from './styles/global';
+
+function App() {
+  return (
+    <Provider store={store}>
+      <Router history={history}>
+        <Routes />
+        <GlobalStyle />
+      </Router>
+    </Provider>
+  );
+}
+
+export default App;
+
+// -----------------------------------------------------------------------------
+
+Testar o reactotron na parte state
+
+No reactotron:
+Ir em state > add > auth
+
+// -----------------------------------------------------------------------------
+
+adicionar isso no 'reducer.js':
+const INITIAL_STATE = {
+  token: '123',
+};
+
+export default function auth(state = INITIAL_STATE, action) {
+  switch (action.type) {
+    default:
+      return state;
+  }
+}
+
+e verificar no state do reactotron
+
+depois Apagar
+
+================================================================================
+
+AUTENTICACAO NO REDUX
+
+'action.js':
+export function signInRequest(email, password) {
+  return {
+    type: '@auth/SIGN_IN_REQUEST',
+    payload: { email, password },
+  };
+}
+
+export function signInSuccess(token, user) {
+  return {
+    type: '@auth/SIGN_IN_SUCCESS',
+    payload: { token, user },
+  };
+}
+
+export function signFailure() {
+  return {
+    type: '@auth/SIGN_FAILURE',
+  };
+}
+
+// -----------------------------------------------------------------------------
+
+yarn add axios (para fazer conexao com a API)
+e na pasta 'services' criar o arquivo 'api.js'
+
+'api.js':
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3333',
+});
+
+export default api;
+
+// -----------------------------------------------------------------------------
+
+importar a 'api.js' no saga
+
+E FAZER O SignIn, para escutar o SIGN_IN_REQUEST, paga a pagina SignIn
+
+A action dispara, o saga escuta e devolve para o Reactotron o estado do reducer
+
+O email, password e os demais, sao recuperado pelo name na tag html no arquivo da pagina
+'SignIn/index.js'
+
+'sagas.js':
+import { all, call, put, takeLatest } from 'redux-saga/effects';
+import api from '~/services/api';
+import { signInSuccess } from './actions';
+
+import history from '~/services/history';
+
+export function* signIn({ payload }) {
+  const { email, password } = payload;
+
+  const response = yield call(api.post, 'sessions', {
+    email,
+    password,
+  });
+
+  const { token, user } = response.data;
+
+  yield put(signInSuccess(token, user));
+
+  history.push('/dashboard'); // Vai direcionar para a pagina de dashboard
+}
+
+export default all([takeLatest('@auth/SIGN_IN_REQUEST', signIn)]);
+
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'SignIn'
+importar o useDispacth e importar o signInRequest
+
+O Dispatch para disparar uma action
+e mudar no handleSubmit de data para email e password
+
+// import React from 'react';
+import { useDispatch } from 'react-redux'; // para disparar uma action
+// import { Link } from 'react-router-dom';
+// import { Form, Input } from '@rocketseat/unform';
+// import * as Yup from 'yup';
+
+import { signInRequest } from '~/store/modules/auth/actions';
+
+
+export default function SignIn() {
+  const dispatch = useDispatch();
+
+  function handleSubmit({ email, password }) {
+    dispatch(signInRequest(email, password));
+  }
+
+// -----------------------------------------------------------------------------
+
+'reducer.js':
+import produce from 'immer'; // para manipular o estado
+
+const INITIAL_STATE = {
+  token: null,
+  signed: false, // Se esta logado ou nao
+  loading: false,
+};
+
+export default function auth(state = INITIAL_STATE, action) {
+  return produce(state, draft => {
+    switch (action.type) {
+      case '@auth/SIGN_IN_SUCCESS': {
+        draft.token = action.payload.token;
+        draft.signed = true;
+        draft.loading = false;
+        break;
+      }
+
+      default:
+    }
+  });
+}
+
+// -----------------------------------------------------------------------------
+
+Redirecionar o usuario para rota de dashboard
+'Route.js':
+
+import store from '~/store';
+
+// export default function RouteWrapper({
+//   component: Component,
+//   isPrivate,
+//   ...rest
+// }) {
+
+  // false = Nao ta logado. true = ta logado.
+  const { signed } = store.getState().auth;  // Vai pegar o estado da pasta auth
+
+// -----------------------------------------------------------------------------
+
+rodar o backend
+fazer login e ver no state do reactotron
+================================================================================
+
+ARMAZENANDO PERFIL - ARMAZENANDO DADOS DO USUARIO E TOKEN NO REDUX
+
+Ja que e a parte de usuario, e nao de autenticacao do usuario
+
+Criar pasta no 'store/modules', chamada 'user' e dentro 3 arquivos
+'action.js', 'reducer.js', 'sagas.js'
+
+// -----------------------------------------------------------------------------
+
+'sagas.js':
+import { all } from 'redux-saga/effects';
+
+export default all([]);
+
+// -----------------------------------------------------------------------------
+
+'reducer.js':
+import produce from 'immer'; // para manipular o estado
+
+const INITIAL_STATE = {
+  profile: null,
+};
+
+export default function user(state = INITIAL_STATE, action) {
+  return produce(state, draft => {
+    switch (action.type) {
+      case '@auth/SIGN_IN_SUCCESS': {  // toda vez que action '@auth/SIGN_IN_SUCCESS' for disparada
+        draft.profile = action.payload.user;
+        break;
+      }
+
+      default:
+    }
+  });
+}
+
+// -----------------------------------------------------------------------------
+
+cadastrar esse novo reducer de user no 'rootReducer.js':
+
+import { combineReducers } from 'redux';
+
+import auth from './auth/reducer';
+import user from './user/reducer';
+
+export default combineReducers({
+  auth,
+  user,
+});
+
+// -----------------------------------------------------------------------------
+
+cadastrar esse novo saga de user no 'rootSaga.js':
+
+import { all } from 'redux-saga/effects';
+
+import auth from './auth/sagas';
+import user from './user/sagas';
+
+export default function* rootSaga() {
+  return yield all([auth, user]);
+}
+
+// -----------------------------------------------------------------------------
+
+E testar logando e ir no reactotron criar uma subscription na parte do state,
+clicando no " + ", e dar o nome de 'user', e depois ver o 'profile' no 'user'
+
+================================================================================
+
+PERSISTINDO AUTENTICACAO - SALVAR DADOS DO USUARIO NO LOCALSTORAGE
+
+yarn add redux-persist
+
+Criar dentro da pasta 'store' o arquivo 'persistReducers.js'
+
+Ele vai recuperar a informacoes do redux e persistir no localStorage do navegador
+
+import storage from 'redux-persist/lib/storage';
+import { persistReducer } from 'redux-persist';
+
+export default reducers => {
+  const persistedReducer = persistReducer(
+    {
+      key: 'meetapp',
+      storage,
+      whitelist: ['auth', 'user'],
+    },
+    reducers
+  );
+
+  return persistedReducer;
+};
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'store'
+
+O rootReducer tem que persistir com a informacoes no localStorage
+
+tirar o default la embaixo
+
+importar o persistStore do redux persist
+
+"import { persistStore } from 'redux-persist';"
+"import persistReducers from './persistReducers';"
+"const store = createStore(persistReducers(rootReducer), middlewares);"
+"const persistor = persistStore(store);"
+"export { store, persistor };"
+
+
+import { persistStore } from 'redux-persist';
+import createSagaMiddleware from 'redux-saga';
+
+import createStore from './createStore';
+import persistReducers from './persistReducers';
+
+import rootReducer from './modules/rootReducer';
+import rootSaga from './modules/rootSaga';
+
+const sagaMonitor =
+  process.env.NODE_ENV === 'development'
+    ? console.tron.createSagaMonitor()
+    : null;
+
+const sagaMiddleware = createSagaMiddleware({ sagaMonitor });
+
+const middlewares = [sagaMiddleware];
+
+const store = createStore(persistReducers(rootReducer), middlewares);
+const persistor = persistStore(store);
+
+sagaMiddleware.run(rootSaga);
+
+export { store, persistor };
+
+Vai dar erro, logo abaixo vamos resolver
+
+// -----------------------------------------------------------------------------
+
+Mudar isso no 'App.js' e
+Mudar isso no 'Routes.js':
+
+'antes':
+import store from './store';
+
+'depois':
+import { store } from './store';
+
+E volta a funcionar
+
+// -----------------------------------------------------------------------------
+
+Voltar no 'App.js'
+importar o PersistGate e colocar por dentro do Provider store,
+e importar o persistor junto com store
+e quando colcar o PersistGate, ele tb vai, <PersistGate persistor={persistor} />
+
+O PersistGate so vai renderizar depois que tiver buscado as informacoes dentro
+do storage da nossa aplicacao
+
+import React from 'react';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+
+import './config/ReactotronConfig';
+
+import Routes from './routes';
+import history from './services/history';
+
+import { store, persistor } from './store'; // Onde esta todo os red,act,sag
+
+import GlobalStyle from './styles/global';
+
+function App() {
+  return (
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <Router history={history}>
+          <Routes />
+          <GlobalStyle />
+        </Router>
+      </PersistGate>
+    </Provider>
+  );
+}
+
+export default App;
+
+e testa logando e vendo o reactotron
+
+================================================================================
+
+LOADING DE AUTENTICACAO - FAZER O LOADING BONITINHO
+
+adicionar o SIGN_IN_REQUEST e o SIGN_FAILURE com o loading dentro
+
+Ir no 'reducer.js' da pasta 'auth':
+import produce from 'immer'; // para manipular o estado
+
+const INITIAL_STATE = {
+  token: null,
+  signed: false, // Se esta logado ou nao
+  loading: false,
+};
+
+export default function auth(state = INITIAL_STATE, action) {
+  return produce(state, draft => {
+    switch (action.type) {
+      case '@auth/SIGN_IN_REQUEST': {
+        draft.loading = true;
+        break;
+      }
+
+      case '@auth/SIGN_IN_SUCCESS': {
+        draft.token = action.payload.token;
+        draft.signed = true;
+        draft.loading = false;
+        break;
+      }
+
+      case '@auth/SIGN_FAILURE': {
+        draft.loading = false;
+        break;
+      }
+
+      default:
+    }
+  });
+}
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'SignIn': importar o useSelector - para criar um state
+import { useDispatch, useSelector } from 'react-redux';
+
+criar o const loading dentro do function SignIn()
+
+const dispatch = useDispatch();
+const loading = useSelector(state => state.auth.loading);
+
+e ir no button
+<button type="submit">{loading ? 'Carregando...' : 'Acessar'}</button>
+
+// -----------------------------------------------------------------------------
+PARA TIRAR O LOADING
+
+ir no 'sagas.js' da pasta 'auth'
+importar o signFailure: import { signInSuccess, signFailure } from './actions';
+
+colocar todo nosso bloco de codigo dentro de um try catch
+e no catch colocar o signFailure, PARA TIRAR O LOADING
+
+import { takeLatest, call, put, all } from 'redux-saga/effects';
+
+import history from '~/services/history';
+import api from '~/services/api';
+
+import { signInSuccess, signFailure } from './actions';
+
+export function* signIn({ payload }) {
+  try {
+    const { email, password } = payload;
+
+    const response = yield call(api.post, 'sessions', {
+      email,
+      password,
+    });
+
+    const { token, user } = response.data;
+
+    yield put(signInSuccess(token, user)); // AQUI VAI DISPARAR O signInSuccess la da actions
+
+    history.push('/dashboard');
+  } catch (err) {
+    yield put(signFailure());
+  }
+}
+
+export default all([takeLatest('@auth/SIGN_IN_REQUEST', signIn)]);
+
+// -----------------------------------------------------------------------------
+
+Logar com um usuario que nao existe,
+nao vai logar e vai aparecer o carregando bem rapido
+
+================================================================================
+
+EXIBINDO TOAST
+Aquele aviso no canto superior direito, igual do site da Rocketseat
+
+yarn add react-toastify
+
+Ir no 'App.js':
+importar o ToastContainer e colocar junto com Routes e GlobalStyle
+e colocar um autoClose que vai fazer fechar sozinho em 3 segundos
+import { ToastContainer } from 'react-toastify';
+<ToastContainer autoClose={3000} />
+
+// -----------------------------------------------------------------------------
+
+'App.js':
+
+import React from 'react';
+import { PersistGate } from 'redux-persist/integration/react';
+import { ToastContainer } from 'react-toastify';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+
+import './config/ReactotronConfig';
+
+import Routes from './routes';
+import history from './services/history';
+
+import { store, persistor } from './store'; // Onde esta todo os red,act,sag
+
+import GlobalStyle from './styles/global';
+
+function App() {
+  return (
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <Router history={history}>
+          <Routes />
+          <GlobalStyle />
+          <ToastContainer autoClose={3000} />
+        </Router>
+      </PersistGate>
+    </Provider>
+  );
+}
+
+export default App;
+
+// -----------------------------------------------------------------------------
+
+Ir no 'global.js' da pasta 'styles': importar o react toastify
+import { createGlobalStyle } from 'styled-components';
+
+import 'react-toastify/dist/ReactToastify.css';
+
+// -----------------------------------------------------------------------------
+
+ir no 'sagas.js' da pasta 'auth': e colocar
+toast success no try
+toast error no catch
+
+import { all, call, put, takeLatest } from 'redux-saga/effects';
+import { toast } from 'react-toastify';
+
+import history from '~/services/history';
+import api from '~/services/api';
+
+import { signInSuccess, signFailure } from './actions';
+
+export function* signIn({ payload }) {
+  try {
+    const { email, password } = payload;
+
+    const response = yield call(api.post, 'sessions', {
+      email,
+      password,
+    });
+
+    const { token, user } = response.data;
+
+    yield put(signInSuccess(token, user)); // AQUI VAI DISPARAR O signInSuccess la da actions
+    toast.success('Usuário logado com sucesso');
+    history.push('/dashboard'); // Vai direcionar para a pagina de dashboard
+  } catch (err) {
+    toast.error('Falha na autenticação, verifique seus dados');
+    yield put(signFailure());
+  }
+}
+
+export default all([takeLatest('@auth/SIGN_IN_REQUEST', signIn)]);
+
+
+// -----------------------------------------------------------------------------
+
+E testar com o usuario que existe e nao existe
+
+================================================================================
+
+CADASTRO NA APLICACAO
+
+vai se ligar com a rota de cadastro igual do insomnia
+e vai criar o usuario la no banco de dados
+
+Ir na 'actions.js' da pasta 'auth', colocar o signUpRequest
+
+export function signInRequest(email, password) {
+  return {
+    type: '@auth/SIGN_IN_REQUEST',
+    payload: { email, password },
+  };
+}
+
+export function signInSuccess(token, user) {
+  return {
+    type: '@auth/SIGN_IN_SUCCESS',
+    payload: { token, user },
+  };
+}
+
+export function signUpRequest(name, email, password) {
+  return {
+    type: '@auth/SIGN_UP_REQUEST',
+    payload: { name, email, password },
+  };
+}
+
+export function signFailure() {
+  return {
+    type: '@auth/SIGN_FAILURE',
+  };
+}
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da past 'SingUp':
+colocar o dispatch para dispara um evento no redux
+importar a action signUpRequest para ser disparada pelo dispatch
+
+O dispatch vai pegar a action signUpRequest, a funcao handleSubmit vai pegar
+os parametro que a action precisa, name, email, password
+
+// import React from 'react';
+import { useDispatch } from 'react-redux';
+
+// import logo from '~/assets/logo.svg';
+
+import { signUpRequest } from '~/store/modules/auth/actions';
+
+export default function SignUp() {
+  const dispatch = useDispatch();
+
+  function handleSubmit({ name, email, password }) {
+    dispatch(signUpRequest(name, email, password));
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+Ir no 'sagas.js' da pasta 'auth':
+
+AQUI VAI SE CONECTAR COM O BANCO DE DADOS
+O SAGAS SEMPRE SE CONECTAR COM O BANCO DE DADOS PARA RECUPERAR OS VALORES DE LA
+Ex: yield call(api.post, 'users',)..
+
+criar mais um takeLastest para o ouvir o SIGN_UP_REQUEST
+e criar a funcao signUp
+
+export default all([
+  takeLatest('@auth/SIGN_IN_REQUEST', signIn),
+  takeLatest('@auth/SIGN_UP_REQUEST', signUp),
+]);
+
+// -----------------------------------------------------------------------------
+
+export function* signUp({ payload }) {
+  try {
+    const { name, email, password } = payload;
+
+    yield call(api.post, 'users', {
+      name,
+      email,
+      password,
+    });
+
+    toast.success('Cadastro feito com sucesso, faça o login');
+
+    history.push('/'); // Depois de fazer o cadastro redirecionar para tela de login
+  } catch (err) {
+    toast.error('Falha no cadastro, e-mail já cadastrado, tente outro');
+
+    yield put(signFailure());
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+O sagas recebe os dados do usuario.
+A action verifica qual foi o tipo de chamada, e salva no redux as info
+E o reducer de acordo com a chamada, salva o state que essa chamada precisa
+Algo assim
+
+================================================================================
+
+REQUISICOES AUTENTICADAS
+
+Toda chamada a api que fizermos, ela vai enviar o token para toda chamada,
+toda rota, mantendo o usuario autenticado nas paginas que precisam de autenticacao
+
+Para salvar o token quando tiver usando a aplicacao em todas as paginas
+
+Ir no 'sagas' da pasta 'auth' e colocar:
+// Para salvar o token quando tiver usando a aplicacao em todas as paginas
+
+dentro da function* signIn colocar;
+api.defaults.headers.authorization = `Bearer ${token}`;
+
+
+const { token, user } = response.data;
+
+// Para salvar o token quando tiver usando a aplicacao em todas as paginas
+api.defaults.headers.authorization = `Beared ${token}`;
+
+yield put(signInSuccess(token, user));
+
+// -----------------------------------------------------------------------------
+
+Criar a funcao para sempre manter o token, depois da function signUp();
+
+// Para salvar o token em todas as paginas
+export function setToken({ payload }) {
+  if (!payload) return;
+
+  const { token } = payload.auth;
+
+  if (token) {
+    api.defaults.headers.authorization = `Bearer ${token}`;
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+e colocar no final mais um takelatest para salvar o token, para persistir
+takeLatest('persist/REHYDRATE', setToken), // Para salvar o token em todas as paginas
+
+O persist/REHYDRATE, sempre vem com um payload,
+Se ele nao existir ou tiver vazio, vai dar um return normal.
+
+Se existir, pega o token que ta dentro de payload.auth.token
+e faz persistir o token nos headers das paginas
+
+
+export default all([
+  takeLatest('persist/REHYDRATE', setToken), // Para salvar o token em todas as paginas
+  takeLatest('@auth/SIGN_IN_REQUEST', signIn),
+  takeLatest('@auth/SIGN_UP_REQUEST', signUp),
+]);
+
+// -----------------------------------------------------------------------------
+
+PARTE CHATINHA
+
+E para testar, ve se as rotas estao recebendo o Beared token na aba Network
+do Google Chrome e ver se a rota GET, esta recebendo o beared token
+
+e para testar colocar no 'index.js'  da pasta 'dashboard':
+
+import React from 'react';
+import api from '~/services/api';
+
+export default function Dashboard() {
+  api.get('subscriptions');
+
+  return <h1>Dashboard</h1>;
+}
+
+================================================================================
+
+ESTILIZACOES
+
+================================================================================
+
+CONFIGURANDO O HEADER
+NAO ESQUECER DE FAZER A FUNCAO DO BOTAO SAIR
+COLOCAR A FOTO DO USUARIO TAMBEM
+
+Na 'src', criar a pasta 'components'
+e dentro outra pasta 'Header' e dentro um 'index.js' e 'styles.js'
+
+'index.js' da pasta 'Header':
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+import { Container, Content, Profile } from './styles';
+
+import logo from '~/assets/logo.svg';
+
+export default function Header() {
+  function handleSignOut() {}
+
+  return (
+    <Container>
+      <Content>
+        <nav>
+          <Link to="/dashboard">
+            <img src={logo} alt="Meetapp" />
+            eetapp
+          </Link>
+        </nav>
+
+        <aside>
+          <Profile>
+            <div className="name_e_img">
+              <div className="name_e_link">
+                <strong>Alan Costa</strong>
+                <Link to="/profile">Meu Perfil</Link>
+              </div>
+
+              <img
+                src="https://api.adorable.io/avatars/50/abott@adorable.png"
+                alt="Alan Costa"
+              />
+            </div>
+
+            <div className="barra"></div>
+
+            <button type="button" onClick={handleSignOut}>
+              Sair
+            </button>
+          </Profile>
+        </aside>
+      </Content>
+    </Container>
+  );
+}
+
+
+
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'default' de '_layouts'
+Porque e uma pagina que so o usuario autenticado vai poder entrar
+regra desse default ta la na 'Routes.js':
+
+colocar o Header que criamos, importar ele e colocar dentro do Wrapper
+ai o Header vai aparecer na pagina:
+
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import Header from '~/components/Header';
+
+import { Wrapper } from './styles';
+
+export default function DefaultLayout({ children }) {
+  return (
+    <Wrapper>
+      <Header />
+      {children}
+    </Wrapper>
+  );
+}
+
+DefaultLayout.propTypes = {
+  children: PropTypes.element.isRequired,
+};
+
+// -----------------------------------------------------------------------------
+
+Estilizando o css do Header
+'styles.js' da pasta 'Header':
+
+import styled from 'styled-components';
+import { darken } from 'polished';
+
+export const Container = styled.div`
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0 30px;
+`;
+
+export const Content = styled.div`
+  max-width: 900px;
+  height: 92px;
+
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  nav {
+    display: flex;
+    align-items: center;
+
+    a {
+      font-weight: bold;
+      color: #fff;
+      font-size: 36px;
+      margin-left: 1px;
+    }
+  }
+
+  aside {
+    display: flex;
+    align-items: center;
+  }
+`;
+
+export const Profile = styled.div`
+  display: flex;
+  align-items: center;
+
+  div.name_e_img {
+    display: flex;
+    align-items: center;
+    text-align: right;
+    padding: 17px;
+
+    &:hover {
+      background: ${darken(0.3, 'rgba(0,0,0,0.3)')};
+    }
+  }
+
+  div.name_e_link {
+    margin-right: 10px;
+
+    strong {
+      display: block;
+      color: #fff;
+    }
+
+    a {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: #999;
+    }
+  }
+
+  div.barra {
+    height: 41px;
+    border-right: 1px solid #999;
+  }
+
+  img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+
+    padding: 3px;
+    background: linear-gradient(to right, red, purple);
+  }
+
+  button {
+    width: 71px;
+    height: 42px;
+    background: #f94d6a;
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.2s;
+
+    margin-left: 20px;
+
+    &:hover {
+      background: ${darken(0.03, '#f94d6a')};
+    }
+  }
+`;
+
+
+// -----------------------------------------------------------------------------
+
+PAGINA DE PERFIL - ESTILIZACAO
+
+"yarn add react-icons"
+
+Na pasta 'Profile' criar o arquivo 'styles.js'
+
+'index.js' da pasta 'Profile':
+import React from 'react';
+import { useSelector } from 'react-redux';
+
+import { Form, Input } from '@rocketseat/unform';
+
+import { MdAddCircleOutline } from 'react-icons/md';
+
+import { Container, Content, Button } from './styles';
+
+export default function Profile() {
+  // Pegar os dados do usuario atual no redux (nome, email). O initialData, pega automaticamente
+  const profile = useSelector(state => state.user.profile);
+
+  function handleSubmit(data) {}
+
+  return (
+    <Container>
+      <Content>
+        <Form initialData={profile} onSubmit={handleSubmit}>
+          <Input name="name" placeholder="Nome Completo" />
+          <Input
+            name="email"
+            type="email"
+            placeholder="Seu endereço de e-mail"
+          />
+
+          <hr />
+
+          <Input
+            type="password"
+            name="oldPassword"
+            placeholder="Sua senha atual"
+          />
+          <Input type="password" name="password" placeholder="Nova senha" />
+          <Input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirmação de senha"
+          />
+
+          <Button>
+            <button type="submit">
+              <MdAddCircleOutline color="fff" size={18} margin-right={10} />
+              Atualizar perfil
+            </button>
+          </Button>
+        </Form>
+      </Content>
+    </Container>
+  );
+}
+
+
+
+// -----------------------------------------------------------------------------
+
+'styles.js' da pasta 'Profile':
+
+import styled from 'styled-components';
+import { darken } from 'polished';
+
+export const Container = styled.div`
+  padding: 0 30px;
+`;
+
+export const Content = styled.div`
+  max-width: 900px;
+  margin: 50px auto;
+
+  form {
+    display: flex;
+    flex-direction: column;
+
+    input {
+      background: rgba(0, 0, 0, 0.1);
+      border: 0;
+      border-radius: 4px;
+      height: 50px;
+      padding: 0 15px;
+      color: #fff;
+      margin: 0 0 10px;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    span {
+      color: #fb6f91;
+      align-self: flex-start;
+      margin: 0 0 10px;
+      font-weight: bold;
+    }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
+      margin: 30px 0 20px;
+    }
+  }
+`;
+
+export const Button = styled.div`
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 10px 0 0;
+    width: 162px;
+    height: 42px;
+    background: #f94d6a;
+    border: 0;
+    border-radius: 4px;
+
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+
+    transition: background 0.2s;
+
+    &:hover {
+      background: ${darken(0.03, '#f94d6a')};
+    }
+
+    svg {
+      margin-right: 5px;
+    }
+  }
+`;
+
+
+================================================================================
+
+ATUALIZAR PERFIL
+
+Vai usar a rota do insomnia
+
+Ir no 'actions.js' da pasta 'user':
+
+export function updateProfileRequest(data) {
+  return {
+    type: '@user/UPDATE_PROFILE_REQUEST',
+    payload: { data },
+  };
+}
+
+export function updateProfileSuccess(profile) {
+  return {
+    type: '@user/UPDATE_PROFILE_SUCCESS',
+    payload: { profile },
+  };
+}
+
+export function updateProfileFailure() {
+  return {
+    type: '@user/UPDATE_PROFILE_FAILURE',
+  };
+}
+
+Action>Sagas>Reducer
+
+// -----------------------------------------------------------------------------
+
+Ir no 'sagas.js' da pasta 'user':
+
+import { all, takeLatest, call, put } from 'redux-saga/effects';
+import { toast } from 'react-toastify';
+
+import api from '~/services/api';
+import { updateProfileSuccess, updateProfileFailure } from './actions';
+
+export function* updateProfile({ payload }) {
+  try {
+    const { name, email, ...rest } = payload.data;
+
+    // Unir dois objetos, se existir o campo oldPassword, vai colocar dentro da variavel rest
+    const profile = Object.assign(
+      { name, email },
+      rest.oldPassword ? rest : {}
+    );
+
+    const response = yield call(api.put, 'users', profile);
+
+    toast.success('Perfil atualizado com sucesso');
+
+    // Vai disparar essa action, pegando a variavel response, que recebeu os dados na variavel profile passado logo acima
+    yield put(updateProfileSuccess(response.data));
+  } catch (err) {
+    toast.error('Erro ao atualizar perfil, confira seus dados');
+
+    yield put(updateProfileFailure());
+  }
+}
+
+export default all([takeLatest('@user/UPDATE_PROFILE_REQUEST', updateProfile)]);
+
+
+// -----------------------------------------------------------------------------
+
+Ir no 'reducer.js' da pasta 'user': adicionar o '@auth/UPDATE_PROFILE_SUCCESS'
+
+import produce from 'immer';
+
+const INITIAL_STATE = {
+  profile: null,
+};
+
+export default function user(state = INITIAL_STATE, action) {
+  return produce(state, draft => {
+    switch (action.type) {
+      case '@auth/SIGN_IN_SUCCESS': {
+        draft.profile = action.payload.user;
+        break;
+      }
+      case '@user/UPDATE_PROFILE_SUCCESS': {
+        draft.profile = action.payload.profile; // Esse profile vem do SUCCESS la no actions
+        break;
+      }
+
+      default:
+    }
+  });
+}
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'Profile':
+Fazer a funcao do handleSubmit
+importar a action updateProfileRequest das actions
+Adicionar a funcao ao botao de Salvar o perfil
+Para atualizar a pagina com o novo nome ou o novo email nos inputs
+
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Form, Input } from '@rocketseat/unform';
+
+import { updateProfileRequest } from '~/store/modules/user/actions';
+
+import { Container } from './styles';
+
+export default function Profile() {
+  const dispatch = useDispatch();
+  const profile = useSelector(state => state.user.profile); // Pegar os dados do usuario atual (nome, email) o initialData, pega automaticamente
+
+  function handleSubmit(data) {
+    dispatch(updateProfileRequest(data));
+  }
+
+JA TA FUNCIONANDO O ATUALIZAR
+
+================================================================================
+
+ ATUALIZAR FOTO DE PERFIL
+
+ Dentro da pasta 'Profile' criar a pasta 'AvatarInput' e dentro o 'index.js'
+ e o 'styles.js'
+
+ Isso vai ser um component
+
+ 'index.js' da pasta 'AvatarInput':
+ import React, { useState, useRef, useEffect } from 'react';
+ import { useField } from '@rocketseat/unform';
+
+ import api from '~/services/api';
+
+ import { Container } from './styles';
+
+ export default function AvatarInput() {
+   const { defaultValue, registerField } = useField('avatar');
+
+   const [file, setFile] = useState(defaultValue && defaultValue.id);
+   const [preview, setPreview] = useState(defaultValue && defaultValue.url);
+
+   const ref = useRef();
+
+   // Para o rocketseat/unform acessar a informacao do input
+   useEffect(() => {
+     if (ref.current) {
+       registerField({
+         name: 'avatar_id',
+         ref: ref.current,
+         path: 'dataset.file',
+       });
+     }
+   }, [ref]);
+
+   async function handleChange(e) {
+     const data = new FormData();
+
+     // O campo file dentro do insomnia no MultipartForm
+     data.append('file', e.target.files[0]);
+
+     // Para se conectar com a rota de inserir foto do usuario, enviando data que eh onde ta a imagem
+     const response = await api.post('upload/avatar', data);
+
+     // Aqui e a resposta que da la no insomnia
+     const { id, url } = response.data;
+
+     setFile(id);
+     setPreview(url);
+   }
+
+   return (
+     <Container>
+       <label htmlFor="avatar">
+         <img
+           src={
+             preview || 'https://api.adorable.io/avatars/50/abott@adorable.png'
+           }
+           alt=""
+         />
+
+         <input
+           type="file"
+           id="avatar"
+           accept="image/*"
+           data-file={file}
+           onChange={handleChange}
+           ref={ref}
+         />
+       </label>
+     </Container>
+   );
+ }
+
+//  ----------------------------------------------------------------------------
+
+'styles.js' da pasta 'AvatarInput':
+para a imagem
+
+import styled from 'styled-components';
+
+export const Container = styled.div`
+  align-self: center;
+  margin-bottom: 30px;
+
+  label {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    img {
+      height: 120px;
+      width: 120px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      background: #eee;
+    }
+
+    input {
+      display: none;
+    }
+  }
+`;
+
+// -----------------------------------------------------------------------------
+
+'index.js' da pasta 'Profile':
+apenas adicionar o componente AvatarInput dentro do comeco do Form
+
+import AvatarInput from './AvatarInput';
+
+// Apenas o Avatar Input
+<Form initialData={profile} onSubmit={handleSubmit}/>
+    <AvatarInput name="avatar_id" /> </Form>
+
+// -----------------------------------------------------------------------------
+
+'sagas.js' da pasta 'user'
+Colocar o avatar_id, para ficar salvada a imagem, quando atualizar a pagina
+
+const { name, email, avatar_id, ...rest } = payload.data;
+
+const profile = Object.assign(
+  { name, email, avatar_id },
+  rest.oldPassword ? rest : {})
+
+// -----------------------------------------------------------------------------
+
+'sagas.js' da pasta 'user':
+import { all, takeLatest, call, put } from 'redux-saga/effects';
+import { toast } from 'react-toastify';
+
+import api from '~/services/api';
+
+import { updateProfileSuccess, updateProfileFailure } from './actions';
+
+export function* updateProfile({ payload }) {
+  try {
+    const { name, email, avatar_id, ...rest } = payload.data;
+
+    // Unir dois objetos, se existir o campo oldPassword, vai colocar dentro da variavel rest
+    const profile = Object.assign(
+      { name, email, avatar_id },
+      rest.oldPassword ? rest : {}
+    );
+
+    const response = yield call(api.put, 'users', profile);
+
+    toast.success('Perfil atualizado com sucesso');
+
+    // Vai disparar essa action, pegando a variavel response, que recebeu os dados na variavel profile passado logo acima
+    yield put(updateProfileSuccess(response.data));
+  } catch (err) {
+    toast.error('Erro ao atualizar perfil, confira seus dados');
+
+    yield put(updateProfileFailure());
+  }
+}
+
+export default all([takeLatest('@user/UPDATE_PROFILE_REQUEST', updateProfile)]);
+
+================================================================================
+
+DADOS DO HEADER
+
+No 'index.js' da pasta 'Header':
+importar o useSelector
+
+criar o const profile
+depois colocar o profile.name e o profile.avatar.url, se nao tiver foto
+entao vai a foto que botei na url
+
+import React from 'react';
+import { useSelector } from 'react-redux'; // Para buscar uma informacao no redux
+import { Link } from 'react-router-dom';
+
+import { Container, Content, Profile } from './styles';
+
+import logo from '~/assets/logo.svg';
+
+export default function Header() {
+  const profile = useSelector(state => state.user.profile);
+
+  function handleSignOut() {}
+
+  return (
+    <Container>
+      <Content>
+        <nav>
+          <Link to="/dashboard">
+            <img src={logo} alt="Meetapp" />
+            eetapp
+          </Link>
+        </nav>
+
+        <aside>
+          <Profile>
+            <div className="name_e_img">
+              <div className="name_e_link">
+                <strong>{profile.name}</strong>
+                <Link to="/profile">Meu Perfil</Link>
+              </div>
+
+              <img
+                src={
+                  profile.avatar
+                    ? profile.avatar.url
+                    : 'https://api.adorable.io/avatars/50/abott@adorable.png'
+                }
+                alt={profile.name}
+              />
+            </div>
+
+            <div className="barra"></div>
+
+            <button type="button" onClick={handleSignOut}>
+              Sair
+            </button>
+          </Profile>
+        </aside>
+      </Content>
+    </Container>
+  );
+}
+
+
+================================================================================
+
+LOGOUT DA APLICACAO
+
+No 'action.js' da pasta 'auth'
+adicionar o signOut
+
+// export function signFailure() {
+//   return {
+//     type: '@auth/SIGN_FAILURE',
+//   };
+// }
+
+export function signOut() {
+  return {
+    type: '@auth/SIGN_OUT',
+  };
+}
+
+// -----------------------------------------------------------------------------
+
+No 'reducer.js' da pasta 'auth'
+adicionar mais um case '@auth/SIGN_OUT'
+
+case '@auth/SIGN_OUT': {
+  draft.token = null; // Vai tirar aquele token de autenticacao
+  draft.signed = false;
+  break;
+}
+
+// -----------------------------------------------------------------------------
+
+No 'reducer.js' da pasta 'user'
+Ouvir tambem  esse case no 'reducer' do usuario para deixar o
+draft.profile = null, para nao existir nenhum usuario no redux, la no reactotron
+
+case '@auth/SIGN_OUT': {
+  draft.profile = null;
+  break;
+}
+
+// -----------------------------------------------------------------------------
+
+No 'sagas.js' da pasta 'auth':
+Ouvir esse signOut com o takeLatest (colocar por ultimo)
+
+e criar uma funcao chamada signOut
+
+takeLatest('@auth/SIGN_OUT', signOut),
+
+// FAZER LOGOUT, vai deslogar e levar para a pagina principal de login
+export function signOut() {
+  history.push('/');
+}
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'Header'
+
+importar a acao signOut
+import { signOut } from '~/store/modules/auth/actions';
+
+criar a "function handleSignOut", e vai dar um dispatch na action signOut,
+o dispatch ele dispara um evento
+
+export default function Header() {
+  const dispatch = useDispatch();
+  const profile = useSelector(state => state.user.profile);
+
+  function handleSignOut() {
+    dispatch(signOut());
+  }
+
+e colocar esse handleSignOut no onClick do button de sair
+<button type="button" onClick={handleSignOut}>
+  Sair
+</button>
+
+================================================================================
+
+YUP NA PAGINA PROFILE
+
+Colocar aas validacoes do yup e o schema dentro do form
+
+const schema = Yup.object().shape({
+  avatar_id: Yup.number(),
+  name: Yup.string(),
+  email: Yup.string().email(),
+  oldPassword: Yup.string().min(6, 'Digite sua senha'),
+  password: Yup.string()
+    .min(6, 'A senha deve conter no mínimo 6 caracteres')
+    .transform(value => (!value ? null : value))
+    .nullable()
+    .when('oldPassword', (oldPassword, field) =>
+      oldPassword ? field.required('Digite sua senha nova') : field
+    ),
+  confirmPassword: Yup.string().when('password', (password, field) =>
+    password
+      ? field.required().oneOf([Yup.ref('password')], 'As senhas nao coincidem')
+      : field
+  ),
+});
+
+<Form schema={schema} />
+
+================================================================================
+
+ESTILIZACAO DA DASHBOARD E MONTAGEM DOS MEETUPS AUTOMATICAMENTE
+
+Dentro da pasta 'Dashboard' criar o arquivo 'styles.js'
+
+"yarn add date-fns@next"
+
+'index.js':
+import React, { useEffect, useState } from 'react';
+
+import { Link } from 'react-router-dom';
+import { MdAddCircleOutline, MdChevronRight } from 'react-icons/md';
+
+import { format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
+
+import { Container, Content, MeetupList, Meetup } from './styles';
+
+import api from '~/services/api';
+
+export default function Dashboard() {
+  const [meetups, setMeetups] = useState([]);
+
+  useEffect(() => {
+    async function loadMeetups() {
+      const response = await api.get('organizing');
+
+      const data = response.data.map(meetup => {
+        return {
+          ...meetup,
+          formattedDate: format(
+            parseISO(meetup.date),
+            "dd 'de' MMMM', às' HH'h'mm",
+            { locale: pt }
+          ),
+        };
+      });
+
+      setMeetups(data);
+    }
+
+    loadMeetups();
+  }, []);
+
+  return (
+    <Container>
+      <Content>
+        <header>
+          <h1>Meus Meetups</h1>
+          <Link to="newedit">
+            <MdAddCircleOutline color="#fff" size={18} />
+            Novo meetup
+          </Link>
+        </header>
+
+        <MeetupList>
+          {!meetups.length && <div className="empty">Nao existe meetups</div>}
+
+          {meetups.map(meetup => (
+            <Meetup
+              to={`/details/${meetup.id}`}
+              key={meetup.id}
+              past={meetup.past ? 1 : 0}
+            >
+              <p>{meetup.title}</p>
+
+              <aside>
+                <p>{meetup.formattedDate}</p>
+                <MdChevronRight color="#fff" size={36} />
+              </aside>
+            </Meetup>
+          ))}
+        </MeetupList>
+      </Content>
+    </Container>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+
+'styles.js':
+import styled from 'styled-components';
+import { darken } from 'polished';
+import { Link } from 'react-router-dom';
+
+export const Container = styled.div`
+  padding: 0 30px;
+`;
+
+export const Content = styled.div`
+  max-width: 900px;
+  margin: 50px auto 0;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 48px;
+
+    h1 {
+      color: #fff;
+    }
+
+    a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      width: 162px;
+      height: 42px;
+      background: #f94d6a;
+      border: 0;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+
+      transition: background 0.2s;
+
+      &:hover {
+        background: ${darken(0.03, '#f94d6a')};
+      }
+
+      svg {
+        margin-right: 5px;
+      }
+    }
+  }
+`;
+
+export const MeetupList = styled.div`
+  .empty {
+    display: flex;
+    align-self: center;
+    justify-content: center;
+
+    font-size: 20px;
+    color: #fff;
+
+    margin-top: 50px;
+  }
+`;
+
+export const Meetup = styled(Link)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  border-radius: 4px;
+  margin-top: 10px;
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.1);
+
+  > p {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  aside {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    p {
+      color: #999;
+    }
+  }
+`;
+
+
+================================================================================
+
+PAGINA DE DETALHES DO MEETUP (Basico)
+
+'DetailsMeetup'
+
+'index.js':
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import PropTypes from 'prop-types';
+
+import { format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
+
+import api from '~/services/api';
+import history from '~/services/history';
+
+import { Container, Content } from './styles';
+
+export default function DetailsMeetup({ match }) {
+  const { id } = match.params;
+
+  const [meetup, setMeetup] = useState(null);
+
+  useEffect(() => {
+    async function loadMeetup() {
+      try {
+        const response = await api.get(`organizing/${id}`);
+        console.tron.log(response);
+        setMeetup({
+          ...response.data,
+          formattedDate: format(
+            parseISO(response.data.date),
+            "dd/MM/Y - HH'h'mm",
+            { locale: pt }
+          ),
+        });
+      } catch (err) {
+        toast.error('Meetup not found');
+        history.push('/');
+      }
+    }
+
+    loadMeetup();
+  }, [id]);
+  console.tron.log(meetup);
+
+  return (
+    <Container>
+      <Content>
+        <header>
+          <h1>{meetup && meetup.title}</h1>
+        </header>
+      </Content>
+    </Container>
+  );
+}
+
+DetailsMeetup.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+    }),
+  }).isRequired,
+};
+
+// -----------------------------------------------------------------------------
+
+'styles.js'
+import styled from 'styled-components';
+
+export const Container = styled.div`
+  padding: 0 30px;
+`;
+
+export const Content = styled.div`
+  max-width: 900px;
+  margin: 50px auto 0;
+`;
+
+
+================================================================================
+
+'Routes.js': Mudar o nome das rotas nos links
+
+import React from 'react';
+
+import { Switch } from 'react-router-dom';
+import Route from './Route';
+
+import SignIn from '../pages/SignIn';
+import SignUp from '../pages/SignUp';
+
+import Dashboard from '../pages/Dashboard';
+import Profile from '../pages/Profile';
+
+import CreateMeetup from '../pages/CreateMeetup';
+import EditMeetup from '../pages/EditMeetup';
+import DetailsMeetup from '../pages/DetailsMeetup';
+
+export default function Routes() {
+  return (
+    <Switch>
+      <Route path="/" exact component={SignIn} />
+      <Route path="/register" exact component={SignUp} />
+
+      <Route path="/dashboard" exact component={Dashboard} isPrivate />
+      <Route path="/profile" exact component={Profile} isPrivate />
+
+      <Route path="/meetups/create" exact component={CreateMeetup} isPrivate />
+      <Route path="/meetups/:id" exact component={DetailsMeetup} isPrivate />
+      <Route path="/meetups/:id/edit" exact component={EditMeetup} isPrivate />
+    </Switch>
+  );
+}
+
+
+================================================================================
+
+
+PAGINA DE DETALHES DO MEETUP (Completo)
+
+E link para apagar e editar meetup
+
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { Form, Input } from '@rocketseat/unform';
+import { toast } from 'react-toastify';
+import { parseISO } from 'date-fns';
+import { MdSave } from 'react-icons/md';
+import BannerInput from './BannerInput';
+
+import api from '~/services/api';
+import history from '~/services/history';
+
+import { Container, Content, Button } from './styles';
+
+export default function EditMeetup({ match }) {
+  const { id } = match.params;
+
+  const [meetup, setMeetup] = useState(null);
+
+  useEffect(() => {
+    async function loadMeetup() {
+      try {
+        const response = await api.get(`organizing/${id}`);
+        console.tron.log(response);
+        setMeetup({
+          ...response.data,
+          date: parseISO(response.data.date),
+        });
+
+        // setLoading(false);
+      } catch (err) {
+        toast.error('Meetup not found');
+        history.push('/');
+      }
+    }
+
+    loadMeetup();
+
+    // setTimeout(loadMeetup, 1000); // PARA ATRASAR
+  }, [id]);
+
+  async function handleSubmit(data) {
+    try {
+      await api.put(`meetups/${id}`, data);
+
+      toast.success('Meetup foi alterado com sucesso');
+
+      history.push(`/meetups/${id}`);
+    } catch (err) {
+      toast.error('Erro ao cancelar o meetup');
+    }
+  }
+
+  return (
+    <Container>
+      <Content>
+        <Form initialData={meetup} onSubmit={handleSubmit}>
+          <BannerInput name="banner_id" />
+
+          <Input name="title" placeholder="Título do Meetup" />
+          <Input
+            name="description"
+            placeholder="Descrição completa"
+            multiline
+          />
+          <Input name="date" placeholder="Data do meetup" />
+          <Input name="location" placeholder="Localização" />
+
+          <Button>
+            <button type="submit">
+              <MdSave color="fff" size={18} margin-right={10} />
+              Atualizar meetup
+            </button>
+          </Button>
+        </Form>
+      </Content>
+    </Container>
+  );
+}
+
+EditMeetup.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+    }),
+  }).isRequired,
+};
+
+
+
+// -----------------------------------------------------------------------------
+
+import styled from 'styled-components';
+import { darken } from 'polished';
+
+export const Container = styled.div`
+  padding: 0 30px;
+`;
+
+export const Content = styled.div`
+  max-width: 900px;
+  margin: 50px auto 0;
+
+  form {
+    display: flex;
+    flex-direction: column;
+
+    input,
+    textarea {
+      background: rgba(0, 0, 0, 0.1);
+      border: 0;
+      border-radius: 4px;
+      height: 50px;
+      padding: 0 15px;
+      color: #fff;
+      margin: 0 0 10px;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    textarea {
+      resize: none;
+      height: 200px;
+      padding: 15px;
+    }
+
+    span {
+      color: #fb6f91;
+      align-self: flex-start;
+      margin: 0 0 10px;
+      font-weight: bold;
+    }
+  }
+`;
+
+export const Button = styled.div`
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 10px 0 0;
+    width: 162px;
+    height: 42px;
+    background: #f94d6a;
+    border: 0;
+    border-radius: 4px;
+
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+
+    transition: background 0.2s;
+
+    &:hover {
+      background: ${darken(0.03, '#f94d6a')};
+    }
+
+    svg {
+      margin-right: 5px;
+    }
+  }
+`;
+
+
+
+================================================================================
+
+FOTO DO BANNER PARA EDITAR MEETUP
+
+criar o 'styles.js'
+e a pasta 'BannerInput' com 'index.js' e 'styles.js':
+
+'index.js':
+import React, { useState, useEffect, useRef } from 'react';
+import { MdAddAPhoto } from 'react-icons/md';
+
+import { useField } from '@rocketseat/unform';
+
+import { Container } from './styles';
+import api from '~/services/api';
+
+export default function BannerInput() {
+  const { defaultValue, registerField } = useField('banner');
+
+  const [file, setFile] = useState(defaultValue && defaultValue.id);
+  const [preview, setPreview] = useState(defaultValue && defaultValue.url);
+
+  const ref = useRef();
+
+  useEffect(() => {
+    if (ref.current) {
+      registerField({
+        name: 'banner_id',
+        ref: ref.current,
+        path: 'dataset.file',
+      });
+    }
+  }, [ref]);
+
+  async function handleChange(e) {
+    const data = new FormData();
+
+    data.append('file', e.target.files[0]);
+
+    const response = await api.post('upload/banner', data);
+
+    const { id, url } = response.data;
+
+    setFile(id);
+    setPreview(url);
+  }
+
+  return (
+    <Container>
+      <label htmlFor="banner">
+        <img src={preview} alt="" />
+
+        <div className="icon-add">
+          <MdAddAPhoto size={48} color="#999" />
+        </div>
+
+        {defaultValue && (
+          <div className="overlay">
+            <MdAddAPhoto size={48} color="#999" />
+          </div>
+        )}
+
+        <input
+          type="file"
+          id="banner"
+          accept="image/*"
+          data-file={file}
+          onChange={handleChange}
+          ref={ref}
+        />
+      </label>
+    </Container>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+'styles.js':
+
+import styled from 'styled-components';
+
+export const Container = styled.div`
+  align-self: stretch;
+  margin-bottom: 5px;
+
+  label {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+    height: 0;
+    padding-top: 37.778%;
+    background: rgba(0, 0, 0, 0.05);
+    transition: background 0.3s;
+
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+
+      .overlay {
+        opacity: 1;
+      }
+
+      svg {
+        transform: none;
+        opacity: 1;
+      }
+    }
+  }
+
+  .icon-add {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .overlay {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+    z-index: 2;
+
+    svg {
+      transform: translateY(-50px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+  }
+
+  input {
+    display: none;
+  }
+`;
+
+================================================================================
+
+PAGINA DE CRIACAO DE MEETUP
+
+Colocar a pasta "BannerInput" na pasta de components, por que ela vai ser
+reutilizada no "CreateMeetup" e "EditMeetup"
+
+"index.js" da "CreateMeetup":
+
+import React from 'react';
+import { Form, Input } from '@rocketseat/unform';
+import { toast } from 'react-toastify';
+import { MdSave } from 'react-icons/md';
+import BannerInput from '~/components/BannerInput';
+
+import api from '~/services/api';
+import history from '~/services/history';
+
+import { Container, Content, Button } from './styles';
+
+export default function CreateMeetup() {
+  async function handleSubmit(data) {
+    try {
+      await api.post('meetups', data);
+
+      toast.success('Meetup criado com sucesso');
+
+      history.push(`/meetups/${response.data.id}`);
+    } catch (err) {
+      toast.error('Erro ao criar o meeteup');
+    }
+  }
+
+  return (
+    <Container>
+      <Content>
+        <Form onSubmit={handleSubmit}>
+          <BannerInput name="banner_id" />
+
+          <Input name="title" placeholder="Título do Meetup" />
+          <Input
+            name="description"
+            placeholder="Descrição completa"
+            multiline
+          />
+          <Input name="date" placeholder="Data do meetup" />
+          <Input name="location" placeholder="Localização" />
+
+          <Button>
+            <button type="submit">
+              <MdSave color="fff" size={18} margin-right={10} />
+              Criar meetup
+            </button>
+          </Button>
+        </Form>
+      </Content>
+    </Container>
+  );
+}
+
+// -----------------------------------------------------------------------------
+
+import styled from 'styled-components';
+import { darken } from 'polished';
+
+export const Container = styled.div`
+  padding: 0 30px;
+`;
+
+export const Content = styled.div`
+  max-width: 900px;
+  margin: 50px auto 0;
+
+  form {
+    display: flex;
+    flex-direction: column;
+
+    input,
+    textarea {
+      background: rgba(0, 0, 0, 0.1);
+      border: 0;
+      border-radius: 4px;
+      height: 50px;
+      padding: 0 15px;
+      color: #fff;
+      margin: 0 0 10px;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    textarea {
+      resize: none;
+      height: 200px;
+      padding: 15px;
+    }
+
+    span {
+      color: #fb6f91;
+      align-self: flex-start;
+      margin: 0 0 10px;
+      font-weight: bold;
+    }
+  }
+`;
+
+export const Button = styled.div`
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 10px 0 0;
+    width: 162px;
+    height: 42px;
+    background: #f94d6a;
+    border: 0;
+    border-radius: 4px;
+
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+
+    transition: background 0.2s;
+
+    &:hover {
+      background: ${darken(0.03, '#f94d6a')};
+    }
+
+    svg {
+      margin-right: 5px;
+    }
+  }
+`;
+
+================================================================================
+
+Adicionar o DATEPICKER e os loadings
+
+"yarn add react-datepicker"
+
+Criar na pasta "components" a pasta "DatePicker" e criar o "index.js" dentro
+
+E colocar no CreateMeetup e no editMeetup dentro do form
+
+<Input name="description" placeholder="Description" multiline />
+<DatePicker name="date" placeholder="Date" />
+<Input name="location" placeholder="Location" />
+
+// -----------------------------------------------------------------------------
+
+'index.js' da "DatePicker"
+
+import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
+import ReactDatePicker from 'react-datepicker';
+
+import { useField } from '@rocketseat/unform';
+
+import 'react-datepicker/dist/react-datepicker.css';
+
+export default function DatePicker({ name, placeholder }) {
+  const ref = useRef(null);
+  const { fieldName, registerField, defaultValue, error } = useField(name);
+  const [selected, setSelected] = useState(defaultValue);
+
+  useEffect(() => {
+    registerField({
+      name: fieldName,
+      ref: ref.current,
+      path: 'props.selected',
+      clearValue: pickerRef => {
+        pickerRef.clear();
+      },
+    });
+    // eslint-disable-next-line
+  }, [ref.current, fieldName]);
+
+  return (
+    <>
+      <ReactDatePicker
+        name={fieldName}
+        selected={selected}
+        onChange={date => setSelected(date)}
+        minDate={new Date()}
+        showTimeSelect
+        timeFormat="HH:mm"
+        dateFormat="dd/MM/yyyy - HH:mm"
+        ref={ref}
+        placeholderText={placeholder}
+        autoComplete="off"
+      />
+      {error && <span>{error}</span>}
+    </>
+  );
+}
+
+DatePicker.propTypes = {
+  name: PropTypes.string.isRequired,
+  placeholder: PropTypes.string.isRequired,
+};
+
+
+================================================================================
+
+DEPOIS FAZER REAPROVEITAMENTO DE CODIGO

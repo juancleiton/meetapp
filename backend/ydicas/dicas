@@ -1,0 +1,2684 @@
+yarn init -y
+yarn add express
+yarn add sucrase nodemon -D (para usar import eimport { userInfo } from "os"
+ export)
+
+'package.json': adicionar o scripts
+"dependencies": {
+    "express": "^4.17.1"
+  },
+"scripts":{"dev":"nodemon src/server.js}
+
+
+criar o arquivo nodemon.json
+{
+  "execMap": {
+    "js": "sucrase-node"
+  }
+}
+
+depois criar uma pasta "src", e dentro app.js, server.js, routes.js (Configurar)
+1 - routes.js:
+import { Router } from "express";
+
+const routes = new Router();
+
+routes.get("/", (req, res) => {
+  return res.json({ message: "Hello World" });
+});
+
+export default routes;
+
+================================================================================
+
+2 - app.js:
+import express from "express";
+import routes from "./routes";
+
+class App {
+  constructor() {
+    this.server = express();
+
+    this.middlewares();
+    this.routes();
+  }
+
+  middlewares() {
+    this.server.use(express.json());
+  }
+
+  routes() {
+    this.server.use(routes);
+  }
+}
+
+export default new App().server;
+
+================================================================================
+3 - server.js:
+import app from "./app";
+
+app.listen(3333);
+
+================================================================================
+
+PADRONIZAR O CODIGO com ESLINT
+
+yarn add eslint -D
+yarn eslint --init
+(apaga o package-lock.json)
+yarn
+
+Prettier
+yarn add prettier eslint-config-prettier eslint-plugin-prettier -D
+
+.eslintrc
+
+  extends: ['airbnb-base', 'prettier'],
+  plugins: ['prettier'],
+
+  rules: {
+    "prettier/prettier": "error",
+    "class-methods-use-this": "off",
+    "no-param-reassign": "off",
+    "camelcase": "off",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
+  },
+
+(Reabir VSCode para funcionar)
+
+Criar um arquivo ".prettierrc" na raiz.
+{
+    "singleQuote": true,
+    "trailingComma": "es5"
+}
+
+yarn eslint --fix src --ext .js
+
+
+Na raiz, clicar com o botao direito e clicar em "Generate .editorConfig"
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+yarn dev
+
+================================================================================
+
+Instalar o docker no computador.
+
+docker -v (ver a versao do docker)
+docker help (guia de ajuda, e ver se esta funcionando)
+
+Instalar o postgres
+docker run --name database -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres
+(cria uma imagem no pc. E sempre mudar a porta 5432:5432, 5433:5433, 5444:5444)
+0fd217fc7bb6bba9db714c9cc573747e6d9d3d96cfa939cf70b94f4a14f9b9db(id do container)
+
+docker ps (lista todos os container em execucao na maquina)
+docker stop database2 (forcar parada)
+docker ps (lista apenas que esta rodando)
+docker ps -1 (lista todos mesmo desligado)
+docker start database2 (iniciar)
+docker logs database2 (Visualizar erros)
+
+Baixar o postbird para visualizar as informacoes do postgres
+Para conectar = (localhost, 5432, postgres, docker)
+
+Criar uma database no postbird
+Meetapp
+
+================================================================================
+
+Criar uma pasta na "src" chamada "config", e um arquivo "database.js"
+Criar uma pasta na "src" chamada "database", e criar uma pasta dentro "migrations"
+Criar uma pasta na "src" chamada "app", e dentro uma pasta chamada "controllers"
+e e outra pasta chamada "models"
+
+================================================================================
+
+CONFIGURAR O SEQUELIZE
+yarn add sequelize
+yarn add sequelize-cli -D
+
+Criar na raiz, ".sequelizerc" - (Essa pasta vai definir quais serao as pastas
+que serao interpretadas pelo Sequelize para transformar o arquivo JS, para o
+postgres entender em SQL.
+
+const { resolve } = require('path')
+module.exports = {
+  config: resolve(__dirname, 'src', 'config', 'database.js'),
+  'models-path': resolve(__dirname, 'src', 'app', 'models'),
+  'migrations-path': resolve(__dirname, 'src', 'database', 'migrations'),
+  'seeders-path': resolve(__dirname, 'src', 'database', 'seeds')
+}
+
+yarn add pg pg-hstore (postgres)
+
+No "database.js" para se conectar com o banco de dados
+module.exports = {
+  dialect: 'postgres',
+  host: 'localhost',
+  username: 'postgres',
+  password: 'docker',
+  database: 'meetapp',
+  define: {
+    timestamps: true,
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+================================================================================
+
+CRIANDO A PRIMEIRA MIGRATION - CRIAR A TABELA DE USUARIOS DA NOSSA APLICACAO
+yarn sequelize migration:create --name=create-users
+
+Fazer configuracao no arquivo que foi criado dentro da pasta migrations.
+Vai criar a tabela dentro do banco de dados do Postgres
+
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable('users', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      password_hash: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+  },
+
+  down: queryInterface => {
+    return queryInterface.dropTable('users');
+  },
+};
+
+yarn sequelize db:migrate (vai pegar o arquivo e criar dentro da base de dados)
+
+yarn sequelize db:migrate:undo (Desfaz a ultima migration, caso voce queira alterar algo)
+
+================================================================================
+
+CRIAR MODEL DE USUARIO - Vai ser um modelo basico sobre o que o usuario vai precisar passar nos campos.
+Criar um arquivo chamado "User.js" na pasta "models"
+
+import Sequelize, { Model } from 'sequelize';
+
+class User extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        password_hash: Sequelize.STRING,
+      },
+      {
+        sequelize,
+      }
+    );
+  }
+}
+
+export default User;
+
+// --------------------------------------------------------------------
+
+Criar na pasta database um arquivo chamado "index.js"
+vai fazer a conexao com o Banco de dados e carregar todos os models.
+
+import Sequelize from 'sequelize';
+
+import User from '../app/models/User';
+
+import databaseConfig from '../config/database';
+
+const models = [User];
+
+class Database {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    this.connection = new Sequelize(databaseConfig);
+
+    models.map(model => model.init(this.connection));
+  }
+}
+
+export default new Database();
+
+// -----------------------------------------------------------------
+
+depois ir em "app.js" e fazer:
+import './database'
+(para importa o banco de dados e conectar ele) ** IMPORTANTE **
+
+So escrever isso mesmo
+
+// ------------------------------------------------------------------
+
+Depois ir em routes e altera para: incluir o User, para poder criar um usuario
+
+import { Router } from 'express';
+import User from './app/models/User';
+
+const routes = new Router();
+
+routes.get('/', async (req, res) => {
+  const user = await User.create({
+    name: 'Diego Fernandes',
+    email: 'diego@rocketseat.com.br',
+    password_hash: '123456',
+  });
+
+  return res.json(user);
+});
+
+export default routes;
+
+Abrir o http://localhost:3333/
+
+Ai vai mostrar na tela e VAI CRIRAR LA NO POSTBIRD!
+
+*******************************************************************************
+
+CRIACAO DE USUARIOS
+
+Criar um arquivo na pasta controllers chamadao "UserController.js"
+
+import User from '../models/User';
+
+class UserController {
+  async store(req, res) {
+    // Verifica se o email ja existe.
+    const userExists = await User.findOne({ where: { email: req.body.email } });
+
+    if (userExists) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    // Cria o usuario.
+    const { id, name, email, provider } = await User.create(req.body);
+
+    return res.json({
+      id,
+      name,
+      email,
+      provider,
+    });
+  }
+}
+
+export default new UserController();
+
+Alterar a "routes.js" colocando uma nova rota POST. Fazendo o:
+import UserController from './app/controllers/UserController';
+routes.post('/users', UserController.store);
+
+Criar a rota no Insomnia, TESTAR A ROTA ANTES DISSO TUDO e passar isso no body
+
+{
+	"name": "Alan",
+	"email": "alan@rocketseat.com.br",
+	"password_hash": "123456"
+}
+
+================================================================================
+
+GERANDO HASH DA SENHA
+
+yarn add bcryptjs
+
+import bcrypt from 'bcryptjs' no "User.js"
+
+e adiocione no super.init
+password: Sequelize.VIRTUAL, (VIRTUAL, nunca vai existir na base de dados, somente no lado do codigo e no body do insomnia)
+
+depois do super.init adicionar this.addHook('beforeSave')
+this.addHook('beforeSave', async user => {
+  if (user.password) {
+    user.password_hash = await bcrypt.hash(user.password, 8);
+  }
+});
+
+return this;
+
+// -------------------------------------------------------------------------
+
+'User.js':
+
+import Sequelize, { Model } from 'sequelize';
+import bcrypt from 'bcryptjs';
+
+class User extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        password: Sequelize.VIRTUAL,
+        password_hash: Sequelize.STRING,
+      },
+      {
+        sequelize,
+      }
+    );
+
+    // Encriptar a senha com bcrypt
+    this.addHook('beforeSave', async user => {
+      if (user.password) {
+        user.password_hash = await bcrypt.hash(user.password, 8);
+      }
+    });
+
+    return this;
+  }
+}
+
+export default User;
+
+// ----------------------------------------------------------------------------
+AQUI JA NAO PRECISO USAR "password_hash" no body do insomnia, porque o password
+gera uma hash para o "password_hash"
+E la no banco de dados ja fica o hash, ai na SessionController vai ter o checkPassword
+que tem o compare que vai compara o password e password_hash pra ve se tao iguais
+
+Ir no Insomnia para testar.
+{
+	"name": "Diego Fernandes",
+	"email": "diego8@rocketseat.com.br",
+	"password": "123456"
+}
+
+// ----------------------------------------------------------------------------
+
+CONCEITO DE JWT (PAREI AQUi)
+Autenticacao do Usuario
+
+yarn add jsonwebtoken
+
+Criar o arquivo "SessionController.js" na pasta controllers
+
+jwt.sing() Ele vai assinar o ID passado, o secret que e aquele monte de caractere no auth.js e o expiresIn que tambem ta no mesmo arquivo.
+
+Criar o "auth.js" na pasta "config", o "auth.js" esta abaixo deste codigo
+
+// -----------------------------------------------------------------------
+
+"SessionController.js":
+import jwt from 'jsonwebtoken';
+
+import User from '../models/User';
+import authConfig from '../../config/auth';
+
+class SessionController {
+  async store(req, res) {
+    // Verifico o email e password passados no req.body
+    const { email, password } = req.body;
+
+    // Verifico se existe algum email no Bando de Dados, igual o passado no req.body
+    const user = await User.findOne({ where: { email } });
+
+    // Se o email nao existir, entao da um aviso de que "nao foi encontrado"
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    // checkPassword verificar se a senha bate. E tem a negacao.
+    // Se nao bater dar esse erro de "senha nao deu match".
+    // Ai fala, "Se nao bater a senha, faca o retorno de erro."
+    if (!(await user.checkPassword(password))) {
+      return res.status(401).json({ error: 'Password does not match' });
+    }
+
+    const { id, name } = user; //CUIDADO PARA NAO SE ENGANAR
+
+    return res.json({
+      user: {
+        id,
+        name,
+        email,
+      },
+      token: jwt.sign({ id }, authConfig.secret, {
+        expiresIn: authConfig.expiresIn,
+      }),
+    });
+  }
+}
+
+export default new SessionController();
+
+// -----------------------------------------------------------------------
+
+O checkPassword foi criado no model de User:
+
+checkPassword(password) {
+    return bcrypt.compare(password, this.password_hash);
+}
+
+// -----------------------------------------------------------------------
+
+'User.js':
+import Sequelize, { Model } from 'sequelize';
+import bcrypt from 'bcryptjs';
+
+class User extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        password: Sequelize.VIRTUAL,
+        password_hash: Sequelize.STRING,
+      },
+      {
+        sequelize,
+      }
+    );
+
+    // Encriptar a senha com bcrypt
+    this.addHook('beforeSave', async user => {
+      if (user.password) {
+        user.password_hash = await bcrypt.hash(user.password, 8);
+      }
+    });
+
+    return this;
+  }
+
+  // Compara se o password passado, esta igual ao password_hash que foi gerado tambem pelo bcrypt
+  checkPassword(password) {
+    return bcrypt.compare(password, this.password_hash);
+  }
+}
+
+export default User;
+
+
+
+// -----------------------------------------------------------------------
+
+"auth.js":
+export default {
+  secret: 'f29618255c309de4469993cce24286ea',
+  expiresIn: '7d',
+};
+
+// -----------------------------------------------------------------------
+
+E tambem vai crie uma nova rota no "routes.js"(nao lembro de ter criado)
+routes.post('/sessions', SessionController.store);
+
+NO INSOMNIA TAMBEM
+Session > Create Session > POST base_url/sessions
+
+{
+	"email": "alan@rocketseat.com",
+	"password": "123456"
+}
+
+================================================================================
+
+BLOQUEAR O USUARIO DE ACESSAR ALGUM TIPO DE ROTA CASO ELE AINDA NAO ESTEJA LOGADO
+
+Vamo pensar na parte de edicao do usuario.
+
+No "UserController.js" adicione um metodo chamado "update()",
+serve para fazer alteracao/ATUALIZAR dos dados cadastrais.
+
+Nao faz sentido para usuario que nao estao logados, acessar este update(esta rota).
+So faz sentido acessar esse update, quem esta logado.
+
+Criar um nova rota no "routes.js"
+routes.put('/users', UserController.update)
+
+// ---------------------------------------------------------------------------
+
+Vamos agora evitar esta rota quando o usuario NAO estiver autenticado.
+Ou seja vamos criar um middleware para barrar.
+
+
+Criar uma pasta no "app", chamado "middlewares",
+e dentro crie um arquivo middleware de autenticacao o: "auth.js"
+
+Vai fazer uma verificao se o usuario esta logado.
+
+// ---------------------------------------------------------------------------
+
+Vamo pegar aquele token que o SessionController criou,
+e colocar ele no Beared la no insomia, ele vai estar no header.
+
+pega o token que foi criado
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNTY2NDE5NDkyLCJleHAiOjE1NjcwMjQyOTJ9.Ji5HyJB90cGypmuuRmJzhW8A9UImJ4PkRCA2B9AQ85g"
+e colocar dentro do Bearer Token no Insomnia.
+
+Vamos buscar esse token agora no header com o
+"const authHeader = req.headers.authorization".
+
+OU MELHOR:
+No Manage Enviromento colocar o token:
+
+{
+  "base_url": "http://localhost:3333",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNTcwMjc2NDM2LCJleHAiOjE1NzA4ODEyMzZ9.kCKou8uCmzmDIskNiVfQM7MlZpELI2YOiJgC_frhZzo"
+}
+
+// ---------------------------------------------------------------------------
+
+TODA ROTA QUE O USUARIO PRECISA ESTAR AUTENTICADO/LOGADO
+TEM QUE PASSAR NO Beared Token do Insomnia: token
+
+// ---------------------------------------------------------------------------
+
+No "auth.js"
+
+IMPORTANTE ISSO!
+Quando eu chamo esse BearedToken ele vem escrito com o Bearer na frente
+vai precisar separa o token que vem com o "Bearer asdhaoiwd[he;1oi2j3i1hcam"
+
+vai usar split para separar o que tiver espaco,
+como depois do beared tem espaco, o split vai separar e colocar num Array
+
+Ex: [Bearer, asdhaoiwd[he;1oi2j3i1hcam]
+
+usando destruturacao eu coloco: [, token]. token e a variavel que eu crio para receber o "asdhaoiwd[he;1oi2j3i1hcam".
+
+Faco um try catch
+e importo o: import { promisify } from 'util'
+
+Vamos importar o jwt, o authConfig tambem para usar o segredo que tem nele.
+
+Vamos o usar o try catch.
+
+O try vai receber o promisify, ele e uma funcao que pega uma funcao de callback e transforma ela em uma funcao que posso usar async await.
+
+Vou promisificar o metodo jwt.verify() pq ele era um callback antes.
+
+E o promisify(jwt.verify) vai retornar uma outra funcao, sem precisar passar o callback, passando so o restante dos parametros.
+
+"await promisify(jwt.verify)(token, authConfig.secret)"
+
+e o decoded vai receber todas as informacoes de quando criamos o token, vai ficar com o id, email, token etc.
+
+Ai eu uso req.userId, para pegar as informacao do id que tem dentro do decoded.id
+
+req.userId = decoded.id;
+
+isso vai incluir o id do usuario dentro do req e Vai servir para buscar o usuario que ja foi autenticado e fazer as alteracoes
+
+// ---------------------------------------------------------------------------
+
+"auth.js":
+import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
+
+import authConfig from '../../config/auth';
+
+export default async (req, res, next) => {
+  // Vamos buscar o token que esta la no BearedToken, com isso.
+  const authHeader = req.headers.authorization;
+
+  // Se o token nao existir, ou estiver incorreto vai dar esse erro.
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token not provided' });
+  }
+
+  // Vamos dividir esse header, com espaco, para separar do beared
+  // O split vai deixar separado por array e vamos usar desestruturacao.
+  const [, token] = authHeader.split(' ');
+
+  try {
+    const decoded = await promisify(jwt.verify)(token, authConfig.secret);
+
+    req.userId = decoded.id;
+
+    return next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Token invalid' });
+  }
+};
+
+// ---------------------------------------------------------------------------
+E COLOCAR ESSE MIDDLEWARE NA ROUTES, PARA ELE SEMPRE VERIFICAR SE TA AUTENTICADO!!!!!
+
+ELE VAI SER ACIONADO AUTOMATICAMENTE com use
+
+import authMiddleware from './app/middlewares/auth';
+
+Na 'routes.js':
+// Middleware para deixar somente os usuarios autenticados usarem as proximas rotas
+routes.use(authMiddleware);
+
+"UserController.js - na parte do update()"
+async update(req, res) {
+    console.log(req.userId);
+
+    return res.json({ ok: true });
+  }
+
+================================================================================
+
+EDICAO DO CADASTRO DO USUARIO - UPDATE DO USUARIO
+
+Vai mexer no "UserController.js", na parte do update.
+
+async update(req, res) {
+    const { email, oldPassword } = req.body;
+
+    // req.userId, eh a variavel que deixei na rota la no middlewares 'auth.js'. req.userId tem o id do usuario autenticado, id do banco de dados.
+    const user = await User.findByPk(req.userId);
+
+    // Se o email do req.body, for diferente do email que vem do bando de dados
+    // Se for diferente, Vai verificar se aquele email ja existe no bando,
+    // Se existir, Nao vai poder cadastrar com esse email porque ja existe.
+
+    // Se for o mesmo email do usuario logado, apena vai retornar. Se for outro email de outro usuario vai dar erro
+
+    if (email && email !== user.email) {
+      const userExists = await User.findOne({ where: { email } });
+
+      if (userExists) {
+        return res.status(400).json({ error: 'User already exists' });
+      }
+    }
+
+    // Compara para ver se a senha passada no oldPassword esta igual com o password_hash. Se ele nao colocar o oldPassword, ele nao quer mudar a senha.
+    // Nesse caso se nao bater ele vai retornar o erro no abaixo. O oldPassword na frente so serve para o usuario estiver querendo mudar a senha.
+    if (oldPassword && !(await user.checkPassword(oldPassword))) {
+      return res.status(401).json({ error: 'Password does not match' });
+    }
+
+    // Aqui vou pegar o id e o name,
+    // E depois ATUALIZAR com o UPDATE, com as informacoes passada no body, inclusive o password, que nenhum momento foi citado aqui dentro
+    const { id, name } = await user.update(req.body);
+
+    return res.json({
+      id,
+      name,
+      email,
+    });
+  }
+
+// ----------------------------------------------------------------------------
+
+{
+	"email": "alan@rocketseat.com.br",
+	"oldPassword": "1234567",
+	"password": "123456"
+}
+
+================================================================================
+
+VALIDACAO DOS DADOS DE ENTRADA
+
+Yup e uma biblioteca de schema validation
+Adiciona na frente dos stores e dos update
+"yarn add yup"
+
+'UserController.js e SessionController.js'
+
+O oneOf e o Yup.ref, servem para ver se o confirmPassword esta igual o password, para nao ficarem diferentes
+"Controller.js"
+import * as Yup from 'yup';
+import User from '../models/User';
+
+async update(req, res) {
+  const schema = Yup.object().shape({
+    name: Yup.string(),
+    email: Yup.string().email(),
+    oldPassword: Yup.string().min(6),
+    password: Yup.string()
+      .min(6)
+      .when('oldPassword', (oldPassword, field) =>
+        oldPassword ? field.required() : field
+      ),
+    confirmPassword: Yup.string().when('password', (password, field) =>
+      password ? field.required().oneOf([Yup.ref(password)]) : field
+    ),
+  });
+
+================================================================================
+
+UPLOAD DE ARQUIVO - com o Multer
+
+Multer - server para upload de arquivos.
+yarn add multer
+
+criar pasta fora da "src" chamada "tmp", e crie dente de "tmp" uma pasta chamada "uploads".
+criar na "config" um arquivo "multer.js" e configurar.
+
+"multer.js":
+import multer from 'multer';
+import crypto from 'crypto'; // e do proprio express
+import { extname, resolve } from 'path';
+
+export default {
+  storage: multer.diskStorage({
+    destination: resolve(__dirname, '..', '..', 'tmp', 'uploads'),
+    filename: (req, file, cb) => {
+      crypto.randomBytes(16, (err, res) => {
+        if (err) return cb(err);
+
+        return cb(null, res.toString('hex') + extname(file.originalname));
+      });
+    },
+  }),
+};
+
+// -----------------------------------------------------------------------
+
+Em 'routes.js': colocar a rota para por a foto,
+Impotar o multer, multerConfig, AvatarController, BannerController mais pra frente vamos fazer
+colocar o const upload, IMPORTANTE
+
+import { Router } from 'express';
+import multer from 'multer';
+import multerConfig from './config/multer';
+
+import UserController from './app/controllers/UserController';
+import SessionController from './app/controllers/SessionController';
+
+import AvatarController from './app/controllers/AvatarController';
+import BannerController from './app/controllers/BannerController';
+
+import authMiddleware from './app/middlewares/auth';
+
+const routes = new Router();
+const upload = multer(multerConfig);
+
+routes.post('/users', UserController.store);
+routes.post('/sessions', SessionController.store);
+
+routes.use(authMiddleware);
+
+routes.put('/users', UserController.update);
+
+// upload.single() um unico arquivo
+routes.post('/upload/avatar', upload.single('file'), AvatarController.store);
+routes.post('/upload/banner', upload.single('file'), BannerController.store);
+
+export default routes;
+
+// -----------------------------------------------------------
+
+Fazer uma nova rota no INSOMNIA!!! e colocar o token no BearedToken
+"base_url/upload/avatar"
+"base_url/upload/banner"
+
+
+Multipart Form:
+file - file /profile.png
+
+AvAvatarControlleratar e BannerController
+class AvatarController {
+  async store(req, res) {
+    return res.json({ message: 'avatar' });
+  }
+}
+
+export default new AvatarController();
+
+
+// -----------------------------------------------------------------------------
+
+Pro AvatarController e BannerController, temos que criar uma tabela no banco de dados.
+
+yarn sequelize migration:create --name=create-files
+configura a nova migration:
+
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable('files', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      path: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+  },
+
+  down: queryInterface => {
+    return queryInterface.dropTable('files');
+  },
+};
+
+// -----------------------------------------------------------------------------
+
+yarn sequelize db:migrate
+
+// -----------------------------------------------------------------------------
+
+Criar na pasta model "File.js" e configurar.
+
+"File.js":
+import Sequelize, { Model } from 'sequelize';
+
+class File extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        path: Sequelize.STRING,
+      },
+      {
+        sequelize,
+      }
+    );
+    return this;
+  }
+}
+
+export default File;
+
+// -----------------------------------------------------------------------------
+
+Ir no "index.js" da pasta database, importar o model File e colocar no array de const models = [User, File]
+
+"index.js"
+
+import Sequelize from 'sequelize';
+
+import User from '../app/models/User';
+import File from '../app/models/File'
+
+import databaseConfig from '../config/database';
+
+const models = [User, File];
+
+// -----------------------------------------------------------------------------
+
+Confirgurar o AvatarController e BannerController
+
+'AvatarController.js':
+import File from '../models/File';
+
+class AvatarController {
+  async store(req, res) {
+    const { originalname: name, filename: path } = req.file;
+
+    const file = await File.create({
+      name,
+      path,
+    });
+
+    return res.json(file);
+  }
+}
+
+export default new AvatarController();
+
+// -----------------------------------------------------------------------------
+
+'BannerController.js':
+import File from '../models/File';
+
+class BannerController {
+  async store(req, res) {
+    const { originalname: name, filename: path } = req.file;
+
+    const file = await File.create({
+      name,
+      path,
+    });
+
+    return res.json(file);
+  }
+}
+
+export default new BannerController();
+
+
+
+================================================================================
+
+Associar um arquivo para ser o avatar do usuario
+Adicionar um campo novo na tabela de usuarios
+
+Fazer a ligacao(relacionamento, associar) do id da foto com o id do usuario
+
+yarn sequelize migration:create --name=add-avatar-field-to-users
+
+configura a nova migration
+
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.addColumn('users', 'avatar_id', {
+      type: Sequelize.INTEGER,
+      references: {
+        model: 'files',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+      allowNull: true,
+    });
+  },
+
+  down: queryInterface => {
+    return queryInterface.removeColumn('users', 'avatar_id');
+  },
+};
+
+yarn sequelize db:migrate
+
+// -----------------------------------------------------------------------------
+
+Relacionar o model de 'User.js' com o model de 'File.js'
+
+colocar o metodo static associate
+static associate(models) {
+  this.belongsTo(models.File, { foreignKey: 'avatar_id' });
+}
+
+'User.js':
+static associate(models) {
+  this.belongsTo(models.File, { foreignKey: 'avatar_id' });
+}
+
+checkPassword(password) {
+  return bcrypt.compare(password, this.password_hash);
+}
+
+// -----------------------------------------------------------------------------
+
+Chamar o metodo associate no 'index.js' da pasta database
+Fazer um segundo map
+
+models
+  .map(model => model.init(this.connection))
+  .map(model => model.associate && model.associate(this.connection.models));
+
+
+No "Update User" no insomnia:
+{
+	"name": "Alan",
+	"email":"alan@rocketseat.com.br",
+	"oldPassword":"1234567",
+	"password": "123456",
+	"confirmPassword": "123456",
+	"avatar_id": 1
+}
+
+Ai vai relacionar a imagem com o usuario "avatar_id"
+
+================================================================================
+(PAREI AQUI)
+
+AQUI TAMBEM TEREI QUE FAZER A LIGACAO DO ID DA IMAGEM PARA SER O ID DO MEETUP
+
+================================================================================
+
+CRIACAO DO MODEL E MIGRATION DA TABELA DE CRIACAO DE MEETUP
+
+yarn sequelize migration:create --name=create-meetups
+
+O file_id vou pegar da tabela, files, e o user_id vou pegar da tabela users
+
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable('meetups', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      title: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      location: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      date: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      banner_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'files',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+        allowNull: true,
+      },
+      user_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+        allowNull: false,
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+  },
+
+  down: queryInterface => {
+    return queryInterface.dropTable('meetups');
+  },
+};
+
+
+// -----------------------------------------------------------------------------
+
+yarn sequelize db:migrate (migrate cria uma tabela no banco de dados)
+
+// -----------------------------------------------------------------------------
+yarn add date-fns@next
+
+Criar o model de Meetup
+Na pasta 'models', criar o arquivo 'Meetup.js'
+
+E criar dentro uma atributo virtual chamado past, que verifca se ja passou da
+data agendada ou nao
+
+import { isBefore } from 'date-fns';
+import Sequelize, { Model } from 'sequelize';
+
+import Sequelize, { Model } from 'sequelize';
+import { isBefore } from 'date-fns';
+
+class Meetup extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        title: Sequelize.STRING,
+        description: Sequelize.STRING,
+        location: Sequelize.STRING,
+        date: Sequelize.DATE,
+        banner_id: Sequelize.INTEGER,
+        past: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return isBefore(this.date, new Date());
+          },
+        },
+      },
+      {
+        sequelize,
+      }
+    );
+
+    return this;
+  }
+
+  static associate(models) {
+    this.belongsTo(models.File, { foreignKey: 'banner_id', as: 'banner' });
+    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+  }
+}
+
+export default Meetup;
+
+
+// -----------------------------------------------------------------------------
+
+FAZER A ASSOCIACAO
+
+
+// -----------------------------------------------------------------------------
+
+Depois ir no 'index.js' da pasta 'Database' e colocar o Meetup dentro do array
+de const models
+
+import Sequelize from 'sequelize';
+
+import User from '../app/models/User';
+import File from '../app/models/File';
+import Meetup from '../app/models/Meetup';
+
+import databaseConfig from '../config/database';
+
+const models = [User, File, Meetup];
+
+// -----------------------------------------------------------------------------
+
+ROTA DE CRIACAO DO MEETUP - CRIAR O MEETUP
+
+Criar o "MeetupController.js"
+Criar a routa dele no 'routes.js', com store: routes.post('/meetups', MeetupController.store);
+E criar a rota no Insomnia, passar o token no BearedToken: 'base_url/meetups'
+
+{
+	"title": "Encontro OmniStack",
+	"description": "Encotro do alunos do Bootcamp GoStack Turma 8",
+	"location": "Sao Paulo",
+	"date": "2019-11-01T10:00:00-03:00",
+	"banner_id": 2
+}
+
+O date-fns aceita este tipo de data que ta acima, entao ele vai entender.
+Se colocar outro tipo ele nao vai aceitar.
+
+NAO ESQUECER DE FAZER AS ASSOCIACOES, PARA O model de Meetup pega o id atual
+e o id da imagem
+
+No 'User.js'; depois do return this;
+
+static associate(models) {
+  this.belongsTo(models.File, { foreignKey: 'avatar_id', as: 'avatar' });
+}
+
+// -----------------------------------------------------------------------------
+No 'Meetup.js':
+static associate(models) {
+  this.belongsTo(models.File, { foreignKey: 'banner_id', as: 'banner' });
+  this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+}
+
+// -----------------------------------------------------------------------------
+
+"MeetupController.js": ATE O MOMENTO SO A CRIACAO DE MEETUP
+
+import * as Yup from 'yup';
+import { isBefore, parseISO } from 'date-fns';
+import Meetup from '../models/Meetup';
+
+class MeetupController {
+  async store(req, res) {
+    const schema = Yup.object().shape({
+      title: Yup.string().required(),
+      description: Yup.string().required(),
+      location: Yup.string().required(),
+      date: Yup.date().required(),
+      banner_id: Yup.number().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation Fails' });
+    }
+
+    // Não cadastrar meetups com datas que já passaram.
+    if (isBefore(parseISO(req.body.date), new Date())) {
+      return res.status(400).json({ error: 'Date is past' });
+    }
+
+    // Esse req.userId, esta global para todas as rotas pelo middleware, que tem o id do usuario logado
+    // E esse user_id, vai ir pro banco de dados junto com o ...req.body no create
+    const user_id = req.userId;
+
+    const meetup = await Meetup.create({
+      ...req.body,
+      user_id,
+    });
+
+    return res.json(meetup);
+  }
+}
+
+export default new MeetupController();
+
+
+
+// -----------------------------------------------------------------------------
+
+UPDATE DO MEETUP, ATUALIZAR O MEETUP(tem que passar o id pela url)
+criar nova rota no 'routes.js'
+routes.put('/meetups/:id', MeetupController.update);
+
+criar rota no Insomnia e colocar o BearedToken
+'base_url/meetups/1'
+
+async update(req, res) {
+  const schema = Yup.object().shape({
+    title: Yup.string(),
+    description: Yup.string(),
+    location: Yup.string(),
+    date: Yup.date(),
+    banner_id: Yup.number(),
+  });
+
+  if (!(await schema.isValid(req.body))) {
+    return res.status(400).json({ error: 'Validation fails' });
+  }
+
+  // id do usuario logado
+  const user_id = req.userId;
+
+  // Pegando o id do meetup pelo parametro na url
+  const meetup = await Meetup.findByPk(req.params.id);
+
+  // Verificar se o meetup nao existe
+  if (!meetup) {
+    return res.status(401).json({ error: 'Meetup not found' });
+  }
+
+  // Somente o usuario que criou o Meetup pode editar o evento
+  if (meetup.user_id !== user_id) {
+    return res.status(401).json({ error: 'Not authorized' });
+  }
+
+  // Não cadastrar meetups com datas que já passaram.
+  if (isBefore(parseISO(req.body.date), new Date())) {
+    return res.status(400).json({ error: 'Date is past' });
+  }
+
+  if (meetup.past) {
+    return res.status(400).json({ error: "Can't update past meetups" });
+  }
+
+  await meetup.update(req.body);
+
+  return res.json(meetup);
+}
+
+
+// -----------------------------------------------------------------------------
+
+DELETAR MEETUP QUE AINDA NAO PASSOU
+
+criar nova rota no 'routes.js'
+routes.delete('/meetups/:id', MeetupController.delete);
+
+criar rota no Insomnia e colocar o BearedToken
+'base_url/meetups/13'
+
+async delete(req, res) {
+  // Id do usuario logado
+  const user_id = req.userId;
+
+  // Pegando o id do meetup pelo parametro na url
+  const meetup = await Meetup.findByPk(req.params.id);
+
+  // Verificar se o meetup nao existe
+  if (!meetup) {
+    return res.status(401).json({ error: 'Meetup not found' });
+  }
+
+  if (meetup.user_id !== user_id) {
+    return res.status(401).json({ error: 'Not authorized' });
+  }
+
+  if (meetup.past) {
+    return res.status(400).json({ error: "Can't delete past meetups" });
+  }
+
+  meetup.destroy();
+
+  return res.send();
+}
+
+
+// -----------------------------------------------------------------------------
+
+Listar meetups que sao organizado pelo usuario logado
+criar nova rota no 'routes.js'
+routes.get('/meetups', MeetupController.index);
+
+criar rota no Insomnia e colocar o BearedToken
+'base_url/meetups/date/page'
+"http://localhost:3333/meetups?date=2019-07-01&page=1"
+
+Query no Insomnia:
+date | 2019-10-28
+page | 1
+
+A data que retorna do index vem em formato: "date": "2019-10-26T13:00:00.000Z",
+
+O model: file so vai funcionar depois que fazer o negocio da url logo abaixo
+
+async index(req, res) {
+  // Para armazenar os agendamentos encontrados
+  const where = {};
+
+  // Numero da pagina que foi passado na query do insomnia, e esta como pagina default a 1
+  const { page = 1 } = req.query;
+
+  // Ver se existe alguma data na query date, se existir transformar em string com o parseISO
+  if (req.query.date) {
+    const searchDate = parseISO(req.query.date);
+
+    // Buscar os agendamento que tem o mesmo dia passado na query
+    where.date = {
+      [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
+    };
+  }
+
+  const meetups = await Meetup.findAll({
+    where,
+    order: ['date'],
+    limit: 10,
+    offset: (page - 1) * 10, // Vai pular a quantidade de agendamento, 3-1 = 2 * 10 = 20. Pula 20 agendamentos
+    include: [
+      { model: User, as: 'user', attributes: ['id', 'name', 'email'] },
+      { model: File, as: 'banner', attributes: ['id', 'path', 'url'] },
+    ],
+  });
+
+  return res.json(meetups);
+}
+
+================================================================================
+
+COLOCAR URL DA IMAGEM
+'File.js':
+import Sequelize, { Model } from 'sequelize';
+
+class File extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        path: Sequelize.STRING,
+        url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return `http://localhost:3333/files/${this.path}`;
+          },
+        },
+      },
+      {
+        sequelize,
+      }
+    );
+    return this;
+  }
+}
+
+export default File;
+
+// -----------------------------------------------------------------------------
+
+Depois ir na 'app.js' e importar o path e adicionar no middlewares(),
+this.server.use(
+  '/files',
+  express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+);
+
+// -----------------------------------------------------------------------------
+
+import express from 'express';
+import path from 'path';
+
+import routes from './routes';
+
+import './database';
+
+class App {
+  constructor() {
+    this.server = express();
+
+    this.middlewares();
+    this.routes();
+  }
+
+  middlewares() {
+    this.server.use(express.json());
+    this.server.use(
+      '/files',
+      express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+    );
+  }
+
+  routes() {
+    this.server.use(routes);
+  }
+}
+
+export default new App().server;
+
+// -----------------------------------------------------------------------------
+
+E TESTAR
+
+================================================================================
+
+CRIAR O SUBSCRIPTION
+
+yarn sequelize migration:create --name=create-subscriptions
+
+Criar a tabela Subscription com o sequelize:
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable('subscriptions', {
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      meetup_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'meetups',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      user_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+  },
+
+  down: queryInterface => {
+    return queryInterface.dropTable('subscriptions');
+  },
+};
+
+
+yarn sequelize db:migrate
+
+// -----------------------------------------------------------
+
+Criar o model de Subscription
+Na pasta 'models' criar o arquivo 'Subscription.js'
+E colocar a associacao para a tabela, o model vai dizer que ele necessita
+associar aquelas chaves primarias para o model dele
+
+Nao precisa passar nenhuma informacao para esse model, porque no controller,
+Ele vai pegar o id do usuario logado, e cadastrar o usuario no meetup
+
+import { Model } from 'sequelize';
+
+class Subscription extends Model {
+  static init(sequelize) {
+    super.init({}, { sequelize });
+
+    return this;
+  }
+
+  static associate(models) {
+    this.belongsTo(models.Meetup, { foreignKey: 'meetup_id', as: 'meetup' });
+    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+  }
+}
+
+export default Subscription;
+
+
+// -----------------------------------------------------------------------------
+
+Ir no 'index.js' da pasta 'database'
+importar o model de Subscription e colocar dentro do array de models
+
+import Sequelize from 'sequelize';
+
+import User from '../app/models/User';
+import File from '../app/models/File';
+import Meetup from '../app/models/Meetup';
+import Subscription from '../app/models/Subscription';
+
+import databaseConfig from '../config/database';
+
+const models = [User, File, Meetup, Subscription];
+
+// -----------------------------------------------------------------------------
+
+Criar a rota de Subscription na 'routes.js'
+Tem que passar na rota o id do meetup
+routes.post('/meetups/:id/subscriptions', SubscriptionController.store);
+
+E Criar a rota no Insomnia
+base_url/meetups/:id/subscriptions
+
+Criar o Controller de Subscription, para criar uma subscription:
+
+"SubscriptionController":
+import User from '../models/User';
+import Meetup from '../models/Meetup';
+import Subscription from '../models/Subscription';
+
+class SubscriptionController {
+  async store(req, res) {
+    // Pegar o id do meetup pelo parametro na rota
+    const meetup = await Meetup.findByPk(req.params.id, {
+      include: [{ model: User, as: 'user' }],
+    });
+
+    // Pegar o id do usuario logado na tabela User, com id de autenticacao que esta em todas as rotas com o middleware
+    const user = await User.findByPk(req.userId);
+
+    if (!meetup) {
+      return res.status(400).json({ error: 'Meetup not found.' });
+    }
+
+    if (meetup.user_id === req.userId) {
+      return res
+        .status(400)
+        .json({ error: "Can't subscribe to you own meetups" });
+    }
+
+    if (meetup.past) {
+      return res.status(400).json({ error: "Can't susbcribe to past meetups" });
+    }
+
+    // Verificar se o usuario ja se inscreveu no meetup
+    const userAlreadySubscribed = await Subscription.findOne({
+      where: {
+        meetup_id: meetup.id,
+        user_id: req.userId,
+      },
+    });
+
+    if (userAlreadySubscribed) {
+      return res
+        .status(400)
+        .json({ error: 'You are already subscribed to this meetup' });
+    }
+
+    // Onde tenha o usuario logado e exista preenchido o date na tabela meetups
+    const sameDateSubscriptionExists = await Subscription.findOne({
+      where: {
+        user_id: req.userId,
+      },
+      include: [
+        {
+          model: Meetup,
+          as: 'meetup',
+          where: { date: meetup.date },
+        },
+      ],
+    });
+
+    if (sameDateSubscriptionExists) {
+      return res.status(400).json({
+        error: 'You are already subscribed for a meetup on the same date.',
+      });
+    }
+
+    // meetup_id e user_id, da tabela subscription pegando do tabela meetup o id, e o userId do usuario logado.
+    const subscription = await Subscription.create({
+      meetup_id: meetup.id,
+      user_id: req.userId,
+    });
+
+    return res.json(subscription);
+  }
+}
+
+export default new SubscriptionController();
+
+TESTAR!!!!!
+
+================================================================================
+
+LISTAGEM DE MEETUPS QUE O USUARIO SE INSCREVEU E NAO PASSOU A DATA
+listar os meetups em que o usuário logado está INSCRITO.
+
+Criar a rota de Subscription na 'routes.js'
+routes.get('/subscriptions', SubscriptionController.index);
+
+E Criar a rota no Insomnia
+base_url/subscriptions
+
+import { Op } from 'sequelize';
+
+import User from '../models/User';
+import Meetup from '../models/Meetup';
+import Subscription from '../models/Subscription';
+
+class SubscriptionController {
+  // Crie uma rota para listar os meetups em que o usuário logado está inscrito.
+  // Liste apenas meetups que ainda não passaram e ordene meetups mais próximos como primeiros da lista.
+  async index(req, res) {
+    const subscriptions = await Subscription.findAll({
+      where: {
+        user_id: req.userId,
+      },
+      include: [
+        {
+          model: Meetup,
+          as: 'meetup',
+          where: {
+            date: {
+              [Op.gt]: new Date(), // Se a data do meetup for maior que a data atual, entao vai pegar
+            },
+          },
+        },
+      ],
+      order: [['meetup', 'date']],
+    });
+
+    return res.json(subscriptions);
+  }
+}
+
+export default new SubscriptionController();
+
+================================================================================
+
+Crie uma rota para listar os meetups que são ORGANIZADOS pelo usuário logado.
+
+Criar o "OrganizingController.js" na pasta 'controllers'
+
+Criar a rota de Organizing na 'routes.js'
+routes.get('/organizing', OrganizingController.index);
+
+E Criar a rota no Insomnia
+base_url/organizing
+
+"OrganizingController.js":
+import Meetup from '../models/Meetup';
+
+class OrganizingController {
+  //  Crie uma rota para listar os meetups que são organizados pelo usuário logado.(FEITO)
+  async index(req, res) {
+    const meetups = await Meetup.findAll({ where: { user_id: req.userId } });
+
+    return res.json(meetups);
+  }
+}
+
+export default new OrganizingController();
+
+================================================================================
+
+Sempre que um usuário se inscrever no meetup,
+envie um e-mail ao ORGANIZADOR contendo os dados relacionados ao usuário inscrito.
+O template do e-mail fica por sua conta :)
+
+** CONFIRANDO NODEMAILER **
+
+ENVIAR EMAIL
+yarn add nodemailer
+
+criar um arquivo na pasta 'config', chamado "mail.js"
+
+Mailtrap (para ambiente de desenvolvimento), quando tiver online, AMAZON SES, Mailgun, Sparkpost, Gmail. SMTP
+
+Ir no site do mailtrap, create inbox, 'Meetapp' copiar aas credencias e colocar no "mail.js".
+Nodemailer
+
+export default {
+  host: 'smtp.mailtrap.io',
+  port: 2525,
+  secure: false,
+  auth: {
+    user: '2a274dae7757a9',
+    pass: 'da40d0e3889b8f',
+  },
+  from: 'Equipe Meeatpp <noreply@meetapp.com>',
+};
+
+
+// --------------------------------------------------------------------
+
+criar uma pasta na "src" chamada "lib" e na "lib" criar o "Mail.js".
+Vai ficar todas as configuracoes para enviar o email.
+
+handlebars serve pra escrever em html.
+"yarn add express-handlebars nodemailer-express-handlebars"
+
+Quando for definir o caminho dentro do "Mail.js",
+Crie uma pasta na "app" chamada "views",
+dentro de "views", criar uma pasta chamada "emails".
+Dentro da pasta "emails" criar duas pastas, uma chamada "layouts" e outra
+"partials" e um arquivo chamado "subscription.hbs"
+
+Criar um arquivo dentro da pasta "layouts", chamado "default.hbs"
+E volte a configurar o "Mail.js":
+
+"Mail.js":
+import nodemailer from 'nodemailer';
+import mailConfig from '../config/mail';
+
+class Mail {
+  constructor() {
+    const { host, port, secure, auth } = mailConfig;
+
+    this.transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: auth.user ? auth : null, // Verifica se existe um usuario
+    });
+  }
+
+  // Responsavel por enviar o email
+  sendEmail(message) {
+    return this.transporter.sendMail({
+      ...mailConfig,
+      ...message,
+    });
+  }
+}
+
+export default new Mail();
+
+// -----------------------------------------------------------------------------
+
+CONFIGURAR TEMPLATES DE EMAIL
+
+import nodemailer from 'nodemailer';
+import { resolve } from 'path';
+import exphbs from 'express-handlebars';
+import nodemailerhbs from 'nodemailer-express-handlebars';
+import mailConfig from '../config/mail';
+
+class Mail {
+  constructor() {
+    const { host, port, secure, auth } = mailConfig;
+
+    this.transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: auth.user ? auth : null, // Verificar se existe um usuario
+    });
+
+    this.configureTemplates();
+  }
+
+  // Caminho onde vao estar os templates
+  configureTemplates() {
+    const viewPath = resolve(__dirname, '..', 'app', 'views', 'emails');
+
+    this.transporter.use(
+      'compile',
+      nodemailerhbs({
+        viewEngine: exphbs.create({
+          layoutsDir: resolve(viewPath, 'layouts'),
+          partialsDir: resolve(viewPath, 'partials'),
+          defaultLayout: 'default',
+          extname: '.hbs',
+        }),
+        viewPath,
+        extName: '.hbs', // Ter cuidado para o "N" para ficar maiusculo
+      })
+    );
+  }
+
+  // Responsavel por enviar o email
+  sendEmail(message) {
+    return this.transporter.sendMail({
+      ...mailConfig,
+      ...message,
+    });
+  }
+}
+
+export default new Mail();
+
+// -----------------------------------------------------------------------------
+
+Configurar o 'default.hbs'
+<div
+  style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: #222; max-width: 600px;">
+  {{{ body }}}
+</div>
+
+// ---------------------------------------------
+
+Configurar o partials
+Criar dentro da pasta 'partials' o arquivo 'footer.hbs'
+
+'footer.hbs':
+<br />
+Equipe GoBarber
+
+// ---------------------------------------------
+
+Ai volta para o 'default.hbs'
+<div
+  style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: #222; max-width: 600px;">
+  {{{ body }}}
+  {{> footer}}
+</div>
+
+// -----------------------------------------------------------------------------
+
+Configurar o 'subscription.hbs'
+<strong>Ola, {{ organizer }}</strong>
+<p>Houve uma inscrição no meetup {{ meetup }}, os dados do inscrito estão abaixo:</p>
+<p>
+  <strong>Nome: </strong> {{ user }} <br>
+  <strong>E-mail: </strong> {{ email }} <br>
+  <strong>Data: </strong> {{ date }} <br>
+</p>
+
+
+// -----------------------------------------------------------------------------
+
+{;
+
+Na pasta 'app', criar a pasta 'jobs', e dentro o arquivo 'SubscriptionMail.js':
+onde vai ficar para quem o email vai ser mandado
+O user e o meetup vai dar pra pegar aas informacoes dele, quando esse
+'SubscriptionMail' for importado dentro do store la do 'SubscriptionController.js'
+Economizando codigo
+
+import { format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import Mail from '../../lib/Mail';
+
+class SubscriptionMail {
+  get key() {
+    return 'SubscriptionMail';
+  }
+
+  async handle({ data }) {
+    const { meetup, user } = data;
+
+    await Mail.sendEmail({
+      to: `${meetup.user.name} <${meetup.user.email}>`, // La no SubscriptionController.js, no const meetup, tem o include:[User], ai ele ta pegando do meetup o User o nome
+      subject: `[${meetup.title}] - Nova inscrição`,
+      template: 'subscription',
+      context: {
+        organizer: meetup.user.name,
+        meetup: meetup.title,
+        user: user.name,
+        email: user.email,
+        date: format(
+          parseISO(meetup.date),
+          "'Dia' dd 'de' MMMM', ás' HH:mm'h'",
+          { locale: pt }
+        ),
+      },
+    });
+  }
+}
+
+export default new SubscriptionMail();
+
+
+
+
+// -----------------------------------------------------------------------------
+
+Configurando fila com Redis
+
+BACKGROUND JOBS, (TERMINANDO DE ENVIAR EMAIL)
+
+docker run --name redisbarber -p 6379:6379 -d -t redis:alpine
+
+Agora instalar o bee-queue (SERVE COMO FILA) Cada tipo de servico, de background job, ele tem sua propria fila.
+"yarn add bee-queue"
+
+Criar um aquivo na pasta 'lib' chamado "Queue.js"
+
+// -----------------------------------------------------------------------------
+
+Criar um arquivo na pasta 'config' chamado "redis.js"
+
+Conectar ao redis
+'redis.js':
+export default {
+  host: '127.0.0.1',
+  port: 6379,
+};
+
+// -----------------------------------------------------------------------------
+
+"Queue.js":
+import Bee from 'bee-queue';
+import SubscriptionMail from '../app/jobs/SubscriptionMail';
+import redisConfig from '../config/redis';
+
+const jobs = [SubscriptionMail];
+
+class Queue {
+  constructor() {
+    this.queues = {};
+
+    this.init();
+  }
+
+  // Esse jobs ta chamando o SubscriptionMail.
+  // Esse key e handle estao no SubscriptionMail.js
+  init() {
+    jobs.forEach(({ key, handle }) => {
+      this.queues[key] = {
+        bee: new Bee(key, {
+          redis: redisConfig,
+        }),
+        handle,
+      };
+    });
+  }
+
+  // queue = SubscriptionMail
+  // Adicionar novos trabalhos dentro de cada fila.
+  // Cada vez que um email for disparado colocar esse job dentro da fila pra ele ser processado,
+  add(queue, job) {
+    return this.queues[queue].bee.createJob(job).save();
+  }
+
+  // Vai ficar processando em tempo real
+  // Pegando todos os jobs da aplicacao e armazenando eles na variaveis this.queues = {}.
+  // Dentro do this.queus = {}. Armazena a fila que possui a conexao com o bando nao relacional o redis.
+  // E armazena tambem o metodo o handle, processa o job, e manda email e vai fazer qualquer tarefa que precise ser em background.
+  processQueue() {
+    jobs.forEach(job => {
+      const { bee, handle } = this.queues[job.key];
+
+      bee.process(handle);
+    });
+  }
+}
+
+export default new Queue();
+
+
+// -----------------------------------------------------------------------------
+
+Ir no 'SubscriptionController.js'
+
+importar o Queue e importar o job de subscription
+import SubscriptionMail from
+import Queue from '../../lib/Queue';
+
+// Enviar email para o Organizador
+await Queue.add(SubscriptionMail.key, {
+  meetup,
+  user,
+});
+
+// -----------------------------------------------------------------------------
+
+Criar na pasta 'src' um arquivo 'queue.js':
+
+'queue.js': ISSO VAI FICAR RODANDO EM BACKGROUND DIRETO
+import Queue from './lib/Queue';
+
+Queue.processQueue();
+
+// -----------------------------------------------------------------------------
+
+depois vai no "package.json" e adiciona ao lado do scripts dev o queue.
+fica assim:
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "queue": "nodemon src/queue.js",
+  },
+
+yarn queue
+yarn dev
+
+E se inscreve num meetup e ve se recebeu um email
+
+================================================================================
+
+MONITORANDO FALHAS NA FILA
+
+Se o nome de alguma funcao ou algo que estiver errado vai ser mostrado no
+terminal do yarn queue
+
+adiciona isso em 'Queue.js'
+processQueue() {
+  jobs.forEach(job => {
+    const { bee, handle } = this.queues[job.key];
+
+    // Escutar erros
+    bee.on('failed', this.handleFailure).process(handle);
+  });
+}
+
+handleFailure(job, err) {
+  console.log(`Queue ${job.queue.name}: FAILED`, err);
+}
+
+================================================================================
+
+TRATAMENTO DE EXCECOES
+saber os erros que acontecem na aplicacao quando ela vai pra producao
+
+Sentry
+Express>
+Nome do projeto = Meetapp
+CreateProject
+
+yarn add @sentry/node@5.6.2
+
+Criar na pasta 'config' o arquivo 'sentry.js'
+
+'sentry.js':
+export default {
+  dsn: 'https://a7896b482886426398029b1c58c504b8@sentry.io/1784312',
+};
+
+esse dsn ta la no site do sentry, quando voce acaba de criar o projeto
+
+Ir no 'app.js'
+importar o sentry e o sentryConfig
+
+import * as Sentry from '@sentry/node'
+import sentryConfig from './config/sentry';
+
+dentro do constructor:
+// this.server = express();
+
+Sentry.init(sentryConfig);
+
+
+dentro do middlewares(), em primeiro:
+this.server.use(Sentry.Handlers.requestHandler());
+
+dentro do routes(), depois do routes
+this.server.use(Sentry.Handlers.errorHandler());
+
+// -----------------------------------------------------------------------------
+
+yarn add express-async-errors
+
+import 'express-async-errors'; no 'app.js'
+
+// -----------------------------------------------------------------------------
+
+'app.js':
+
+import express from 'express';
+import path from 'path';
+
+import * as Sentry from '@sentry/node';
+import 'express-async-errors';
+import sentryConfig from './config/sentry';
+
+import routes from './routes';
+
+import './database';
+
+class App {
+  constructor() {
+    this.server = express();
+
+    Sentry.init(sentryConfig);
+
+    this.middlewares();
+    this.routes();
+  }
+
+  middlewares() {
+    this.server.use(Sentry.Handlers.requestHandler());
+    this.server.use(express.json());
+    this.server.use(
+      '/files',
+      express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+    );
+  }
+
+  routes() {
+    this.server.use(routes);
+    this.server.use(Sentry.Handlers.errorHandler());
+  }
+}
+
+export default new App().server;
+
+
+================================================================================
+
+testar pra ver se ta funcionando, forcar um error num metodo escrito errado
+ex: finddAll()
+e da um listar no available la no Insomnia e dar um send, ele vai ficar procurando
+Ir la no site do sentry, e la vai estar o erro.
+
+================================================================================
+
+Para tratar aas mensagens de erros para dar uma vizualicao melhor para o desenvolvedor
+"yarn add youch"
+
+importar o Youch
+import Youch from 'youch' , na 'app.js'
+
+Criar dentro do 'app.js' no constructor, por ultimo
+this.exceptionHandler()
+
+e fora do constructor por ultimo:
+exceptionHandler() {
+  this.server.use(async (err, req, res, next) => {
+    const errors = await new Youch(err, req).toJSON();
+
+    return res.status(500).json(errors);
+  });
+}
+
+// -----------------------------------------------------------------------------
+
+'app.js':
+import express from 'express';
+import path from 'path';
+
+import Youch from 'youch';
+
+import * as Sentry from '@sentry/node';
+import 'express-async-errors';
+import sentryConfig from './config/sentry';
+
+import routes from './routes';
+
+import './database';
+
+class App {
+  constructor() {
+    this.server = express();
+
+    Sentry.init(sentryConfig);
+
+    this.middlewares();
+    this.routes();
+
+    this.exceptionHandler();
+  }
+
+  middlewares() {
+    this.server.use(Sentry.Handlers.requestHandler());
+    this.server.use(express.json());
+    this.server.use(
+      '/files',
+      express.static(path.resolve(__dirname, '..', 'tmp', 'uploads'))
+    );
+  }
+
+  routes() {
+    this.server.use(routes);
+    this.server.use(Sentry.Handlers.errorHandler());
+  }
+
+  exceptionHandler() {
+    this.server.use(async (err, req, res, next) => {
+      const errors = await new Youch(err, req).toJSON();
+
+      return res.status(500).json(errors);
+    });
+  }
+}
+
+export default new App().server;
+
+
+Testar listando denovo o Available no insomnia com o erro do finddAll()
+Ai vai aparecer o erro no insmonia e no site do Sentry
+
+================================================================================
+
+VARIAVEIS AMBIENTES
+
+Criar na 'raiz' o arquivo '.env'
+
+APP_URL=http://localhost:3333
+NODE_ENV=development
+
+# Auth
+
+APP_SECRET=bootcampgobarbernode
+
+# Database
+
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASS=docker
+DB_NAME=meetapp
+
+# Mongo
+
+MONGO_URL=mongodb://localhost:27017/gobarber
+
+# Redis
+
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+# Mail
+
+MAIL_HOST=smtp.mailtrap.io
+MAIL_POST=2525,
+MAIL_USER=7f38386354c962,
+MAIL_PASS=1ce2bb361ca43f,
+
+# Sentry
+
+SENTRY_DSN=
+
+// -----------------------------------------------------------------------------
+
+carregar aas variaveis ambientes na aplicacao
+
+yarn add dotenv
+
+// -----------------------------------------------------------------------------
+
+'app.js':
+import 'dotenv/config'; (em primeiro)
+
+// -----------------------------------------------------------------------------
+
+'queue.js':
+import 'dotenv/config'; (em primeiro)
+
+import Queue from './lib/Queue';
+
+Queue.processQueue();
+
+// -----------------------------------------------------------------------------
+
+'File.js' da pasta 'Model':
+'antes':
+url: {
+  type: Sequelize.VIRTUAL,
+  get() {
+    return `http://localhost:3333/files/${this.path}`;
+  },
+
+'depois':
+url: {
+  type: Sequelize.VIRTUAL,
+  get() {
+    return `${process.env.APP_URL}/files/${this.path}`;
+  },
+},
+
+// -----------------------------------------------------------------------------
+
+'app.js':
+'antes':
+exceptionHandler() {
+  this.server.use(async (err, req, res, next) => {
+    const errors = await new Youch(err, req).toJSON();
+
+    return res.status(500).json(errors);
+  });
+}
+
+'depois':
+exceptionHandler() {
+  this.server.use(async (err, req, res, next) => {
+    if (process.env.NODE_ENV === 'development') {
+      const errors = await new Youch(err, req).toJSON();
+
+      return res.status(500).json(errors);
+    }
+
+    return res.status(500).json({ error: 'Internal server error' });
+  });
+}
+
+// -----------------------------------------------------------------------------
+
+'auth.js' da pasta 'config'
+'antes':
+export default {
+  secret: 'f29618255c309de4469993cce24286ea',
+  expiresIn: '7d',
+};
+
+
+'depois':
+export default {
+  secret: process.env.APP_SECRET,
+  expiresIn: '7d',
+};
+
+// -----------------------------------------------------------------------------
+
+'database.js' da pasta 'config'
+'antes':
+require('dotenv/config');
+
+module.exports = {
+  dialect: 'postgres',
+  host: 'localhost',
+  username: 'postgres',
+  password: 'docker',
+  database: 'gobarber',
+  define: {
+    timestamps: true,
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+'depois':
+require('dotenv/config');
+
+module.exports = {
+  dialect: 'postgres',
+  host: process.env.DB_HOST,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  define: {
+    timestamps: true,
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+// -----------------------------------------------------------------------------
+
+'redis.js' da pasta 'config'
+'antes':
+export default {
+  host: '127.0.0.1',
+  port: 6379,
+};
+
+'depois':
+export default {
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+};
+
+// -----------------------------------------------------------------------------
+
+NAO FUNCIONOU NO MEETAPP
+
+'mail.js' da pasta 'config'
+'antes':
+export default {
+  host: 'smtp.mailtrap.io',
+  port: 2525,
+  secure: false,
+  auth: {
+    user: '2a274dae7757a9',
+    pass: 'da40d0e3889b8f',
+  },
+
+  from: 'Equipe Meeatpp <noreply@meetapp.com>',
+};
+
+
+'depois':
+export default {
+  host: process.env.MAIL_HOST,
+  port: process.env.MAIL_PORT,
+  secure: false,
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+
+  from: 'Equipe Meeatpp <noreply@meetapp.com>',
+};
+
+
+// -----------------------------------------------------------------------------
+
+Criar na raiz o '.env.example' com informacoes sensiveis vazias
+APP_URL=http://localhost:3333
+NODE_ENV=development
+
+# Auth
+
+APP_SECRET=bootcampgobarbernode
+
+# Database
+
+DB_HOST=
+DB_USER=
+DB_PASS=
+DB_NAME=
+
+# Mongo
+
+MONGO_URL=
+
+# Redis
+
+REDIS_HOST=127.0.0.1
+REDIS_POST=6379
+
+# Mail
+
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USER=
+MAIL_PASS=
+
+# Sentry
+
+SENTRY_DSN=
+
+yarn queue
+yarn dev
+
+================================================================================
+
+PARA MOSTRAR O AVATAR ASSIM QUE ELE LOGA
+
+Ir no 'SessionController.js':
+fazer o include
+incluir esse include, e retornar o avatar la embaixo
+
+
+import File from '../models/File';:
+
+// Para mostra o avatar assim que o usuario loga. com o include e colocar o avatar na embaixo com o const { id, name, avatar }
+const user = await User.findOne({
+  where: { email },
+  include: [
+    {
+      model: File,
+      as: 'avatar',
+      attributes: ['id', 'path', 'url'],
+    },
+  ],
+});
+
+const { id, name, avatar } = user;
+
+return res.json({
+  user: {
+    id,
+    name,
+    email,
+    avatar,
+  },
+  token: jwt.sign({ id }, authConfig.secret, {
+    expiresIn: authConfig.expiresIn,
+  }),
+});
+
+yarn dev
+Iniciar Session com um usuario com foto
+
+================================================================================
+
+ATUALIZAR A INFORMACAO DE AVATAR DENTRO DA EDICAO DE USUARIO
+
+Ir no 'UserController.js':
+
+import File from '../models/File';
+
+Na parte de update:
+
+await user.update(req.body);
+
+const { id, name, avatar } = await User.findByPk(req.userId, {
+  include: [
+    {
+      model: File,
+      as: 'avatar',
+      attributes: ['id', 'path', 'url'],
+    },
+  ],
+});
+
+return res.json({ id, name, email, avatar });
+
+================================================================================
+
+ATUALIZAR A INFORMACAO DO BANNER DENTRO DA EDICAO DE MEETUP
+
+// Ir no 'MeetupController' e incluir isso:
+// Para recuperar a imagem, e incluir ela na pagina quando atualizar a foto
+
+// Ta pegando o id do meetup que jatava pegando as informacoes pelo findByPk(req.params.id);
+// ai eu vou pegar o id do meetup, vou dar um include do model File, para pegar as informacoes do file desse id,
+// e vou retornar todas as informacoes desse meetup incluindo o model
+
+const { id } = await meetup.update(req.body);
+
+// Atualizar a imagem do meetup na hora de editar
+const updatedMeetup = await Meetup.findByPk(id, {
+  include: [
+    {
+      model: File,
+      as: 'banner',
+      attributes: ['id', 'url', 'path'],
+    },
+  ],
+});
+
+return res.json(updatedMeetup);
+
+================================================================================
+
+Organizing por ID / DETAILS MEETUP
+
+Mostrar o meetup por id na rota
+
+"Routes.js":
+routes.get('/organizing/:id', OrganizingController.show);
+
+e fazer a rota no insomnia
+
+'OrganizingController.js':
+
+Colocar o metodo show:
+import File from '../models/File';
+
+async show(req, res) {
+  const meetup = await Meetup.findByPk(req.params.id, {
+    include: [
+      {
+        model: File,
+        as: 'banner',
+        attributes: ['id', 'path', 'url'],
+      },
+    ],
+  });
+
+  if (!meetup) {
+    return res.status(400).json({ error: 'Meetup not found' });
+  }
+
+  if (meetup.user_id !== req.userId) {
+    return res.status(400).json({ error: 'Unauthorized' });
+  }
+
+  return res.json(meetup);
+}
+
+================================================================================
+
+CRIAR A ROTA DE CANCELAR SUBSCRIPTION
+
+Criar no insomnia e testar
+
+routes.delete('/meetups/:id/subscriptions', SubscriptionController.delete);
+
+// -----------------------------------------------------------------------------
+
+'SubscriptionController.js';
+
+async delete(req, res) {
+    const user = req.userId;
+
+    const meetup = await Meetup.findByPk(req.params.id);
+
+    // Verificar se o meetup nao existe
+    if (!meetup) {
+      return res.status(401).json({ error: 'Meetup not found' });
+    }
+
+    if (meetup.past) {
+      return res.status(400).json({ error: "Can't delete past meetups" });
+    }
+
+    const subscription = await Subscription.findOne({
+      where: {
+        meetup_id: meetup.id,
+        user_id: user,
+      },
+    });
+
+    if (!subscription) {
+      return res
+        .status(400)
+        .json({ error: 'You are not subscribed at this meetup' });
+    }
+
+    subscription.destroy();
+
+    return res.send({ message: 'Deleted' });
+  }
+
+================================================================================
+
+Criar uma forma que diz se o Usuario ja esta inscrito no meetup ou nao
+e colocar isso num arary de subscrib
+Tipo:
+canSubscribed = true (pode)
+canSubscribed = false (nao pode)

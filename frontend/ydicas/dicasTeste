@@ -1,0 +1,98 @@
+Teste no ReactJS e ReactNative
+
+================================================================================
+
+"yarn add react-app-rewired -D"
+
+No 'package.json':
+trocar para:
+"scripts": {
+  "start": "react-app-rewired start",
+  "build": "react-app-rewired build",
+  "test": "react-app-rewired test",
+  "eject": "react-scripts eject"
+},
+
+env: {
+  browser: true,
+  es6: true,
+  jest: true,
+},
+
+Tirar:
+  // "eslintConfig": {
+  //   "extends": "react-app"
+  // },
+
+================================================================================
+
+// --------------------------------------------------------
+Na raiz criar o arquivo 'config-overrides.js'
+module.exports = {};
+
+// --------------------------------------------------------
+
+Dentro do 'package.json', logo depois de "scripts" adicionar
+"jest": {
+  "testMatch": [
+    "**/__tests__/**/*.test.js"
+  ]
+},
+
+// --------------------------------------------------------
+
+Cria na 'src' a pasta '__tests__' e dentro um 'App.test.js'
+
+"yarn add babel-jest -D"
+
+test("example", () => {
+  expect(1 + 1).toBe(2);
+});
+
+// -----------------------------------------------------------------------------
+
+'package.json' adicionar o moduleNameMapper, para o jest entender o '~'
+"jest": {
+  "testMatch": [
+    "**/__tests__/**/*.test.js"
+  ],
+  "moduleNameMapper": {
+    "^~/(.*)": "<rootDir>/src/$1"
+  }
+},
+
+// -----------------------------------------------------------------------------
+
+Na 'raiz' criar o 'jsconfig.json': para o vscode nao se perder na importacoes
+
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "~/*": ["*"]
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+"yarn add @testing-library/react @testing-library/jest-dom -D"
+"yarn add @types/jest -D"
+
+E no 'package.json': adicionar o 'setupFilesAfterEnv'
+
+"jest": {
+  "testMatch": [
+    "**/__tests__/**/*.test.js"
+  ],
+  "setupFilesAfterEnv": [
+    "@testing-library/react/cleanup-after-each", // Limpa o html toda vez que rodar um teste
+    "@testing-library/jest-dom/extend-expect" // Rodar o jest em todos os testes, nao um por um
+  ],
+  "moduleNameMapper": {
+    "^~/(.*)": "<rootDir>/src/$1"
+  }
+},
+
+================================================================================
+
