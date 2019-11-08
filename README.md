@@ -14,8 +14,6 @@
 <img alt="GitHub top language" src="https://img.shields.io/github/issues/alancoosta/Meetapp">
 </p>
 
-a
-
 ### :key: BACKEND
 
 - <div>
