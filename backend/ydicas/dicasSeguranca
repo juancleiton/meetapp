@@ -11,7 +11,7 @@ Limitar tentativa de acessar uma rota
 
 // -----------------------------------------------------------------------------
 
-'Routes.js':
+'routes.js':
 import Brute from 'express-brute';
 import BruteRedis from 'express-brute-redis';
 
@@ -78,8 +78,8 @@ middlewares() {
             port: process.env.REDIS_PORT,
           }),
         }),
-        windowMs: 1000 * 60 * 15, // Tempo
-        max: 10, // Quantidade maxima de tentativas
+        windowMs: 1000 * 60 * 15, // Intervalo de tempo em milisegundos. Intervalo de 15 minutos
+        max: 100, // Quantidade maxima de tentativas
       })
     );
   }
@@ -108,4 +108,5 @@ Github e GreenKeeper
 
 Vai atualizar ass dependencias
 
-Precisar ter os processos de CI e os testes
+Precisar ter os processos de CI e os testes.$for
+Ele precisa de integracao continua, ou seja, precisa estar hospedado
