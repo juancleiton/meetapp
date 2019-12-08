@@ -1,7 +1,7 @@
 Configurar Icone, SplashScreen e nome da aplicacao no ANDROID
 
 Trocar o nome do app:
-'android/app/src/main/res/values/strings.xml'
+  'android/app/src/main/res/values/strings.xml'
 
 // ----------------------------------------------------
 
@@ -15,33 +15,33 @@ apagar todas aas pastas que comecam com minimap
 e colar os drawble
 
 Dentro do arquivo 'AndroidManifest.xml': Trocar
-android:icon="@drawable/icon"
-android:roundIcon="@drawable/icon"
+android: icon = "@drawable/icon"
+android: roundIcon = "@drawable/icon"
 
 // ----------------------------------------------------
 
 Configurar SplashScreen
 
-Na pasta 'value' criar o arquivo 'colors.xml'
+Na pasta 'values' criar o arquivo 'colors.xml'
 
 'colors.xml';
-<?xml version="1.0" encoding="utf-8" ?>
+<? xml version = "1.0" encoding = "utf-8" ?>
 
-<resources>
-  <color name="primary">#fff</color>
-</resources>
+  <resources>
+    <color name="primary">#fff</color>
+  </resources>
 
 // ----------------------------------------------------
 
 Na pasta 'drawable' criar o arquivo 'background_splash.xml'
 
 'background_splash.xml':
-<?xml version="1.0" encoding="utf-8" ?>
+<? xml version = "1.0" encoding = "utf-8" ?>
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:drawable="@color/primary" />
+  <layer-list xmlns: android="http://schemas.android.com/apk/res/android">
+    <item android: drawable="@color/primary" />
 
-  <item android:height="200dp" android:width="200dp" android:drawable="@drawable/icon" android:gravity="center" />
+  <item android: height="200dp" android:width="200dp" android:drawable="@drawable/icon" android:gravity="center" />
 </layer-list>
 
 // ----------------------------------------------------
@@ -49,62 +49,64 @@ Na pasta 'drawable' criar o arquivo 'background_splash.xml'
 Na pasta 'values' em 'styles.xml'
 
 'styles.xml': colocar o SplashTheme
-<resources>
+  < resources >
 
-<!-- Base application theme. -->
-<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+< !--Base application theme. -- >
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
     <!-- Customize your theme here. -->
     <item name="android:textColor">#000000</item>
-</style>
+  </style>
 
-<style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+  <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
     <!-- Customize your theme here. -->
     <item name="android:windowBackground">@drawable/background_splash</item>
-</style>
+  </style>
 
-</resources>
+</resources >
 
-// ----------------------------------------------------
+  // ----------------------------------------------------
 
-Voltar no 'AndroidManifest.xml': adicionar na activity
-android:theme="@style/SplashTheme"
+  Voltar no 'AndroidManifest.xml' adicionar na activity android: theme = "@style/SplashTheme"
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.modulo10">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    < manifest xmlns: android = "http://schemas.android.com/apk/res/android"
+package = "com.modulo10" >
 
-    <application
-      android:name=".MainApplication"
-      android:label="@string/app_name"
-      android:icon="@drawable/icon"
-      android:roundIcon="@drawable/icon"
-      android:allowBackup="false"
-      android:theme="@style/AppTheme">
-      <activity
-        android:theme="@style/SplashTheme"
-        android:name=".MainActivity"
-        android:label="@string/app_name"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-        android:windowSoftInputMode="adjustResize">
+  <uses-permission android: name="android.permission.INTERNET" />
+
+  <application
+    android: name=".MainApplication"
+    android: label="@string/app_name"
+    android: icon="@drawable/icon"
+    android: roundIcon="@drawable/icon"
+    android: allowBackup="false"
+    android: theme="@style/AppTheme">
+    <activity
+      android: theme="@style/SplashTheme"
+  android:name=".MainActivity"
+  android:label="@string/app_name"
+  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+  android:windowSoftInputMode="adjustResize">
         <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
+      <action android: name="android.intent.action.MAIN" />
+            <category android: name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
-    </application>
+  <activity android: name="com.facebook.react.devsupport.DevSettingsActivity" />
+    </application >
 
-</manifest>
+</manifest >
+
+  // ----------------------------------------------------
+
+  E agora rodar o projeto no android
 
 // ----------------------------------------------------
 
-E agora rodar o projeto no android
-
-// ----------------------------------------------------
+ID DO PACOTE DA aplicacao
 
 No 'build.gradle':
 defaultConfig {
-  applicationId "com.gobarber"
+  applicationId "com.nome-da-empresa.gobarber"
 
 // ----------------------------------------------------

@@ -1,6 +1,16 @@
 Iniciar o EMULADOR DO ANDROID STUDIO
 
-sudo chmod 777 /dev/kvm
+sudo chmod 777 / dev / kvm
+
+
+Emular:
+
+Iphone: 'http://localhost:port_backend'
+  Android:
+    - Emulador Android Studio: http://10.0.2.2:port'
+    - Genymotion: http://10.0.3.2:port
+    - USB: IP da máquina na rede
+    - WIFI: IP da máquina na rede:8081 (192.168.1.107:8081)
 
 ================================================================================
 
@@ -953,6 +963,7 @@ CONFIGURANDO O REACTOTRON
 "yarn add redux redux-saga react-redux"
 "yarn add reactotron-react-native reactotron-redux reactotron-redux-saga"
 "yarn add @react-native-community/async-storage"
+yarn react-native link @react-native-community/async-storage
 
 Na 'src' criar a pasta 'config' e dentro o 'ReactotronConfig.js'
 
@@ -979,7 +990,6 @@ if (__DEV__) {
 
 // -----------------------------------------------------------------------------
 
-"yarn add redux redux-saga react-redux"
 
 Ir no 'index.js' da 'src' e importar o 'ReactotronConfig.js'
 
@@ -994,6 +1004,13 @@ import Routes from './routes';
 
 E reiniciar o android se tiver dando erro
 E abrir o reactotron e ver se ta conectado
+
+Emulando pelo celular:
+Conectar pelo usb, ve se funciona, se nao
+adb reverse tcp:8081 tcp:8081
+adb reverse tcp:9090 tcp:9090
+
+e desconectar do cabo
 
 ================================================================================
 
@@ -1034,6 +1051,14 @@ Na 'src' criar a pasta 'services' e dentro o arquivo 'api.js'
 
 'api.js':
 import axios from 'axios';
+
+/* baseURL
+  iphone: 'http://localhost:port_backend'
+  android:
+    - emulador studio: http://10.0.2.2:port'
+    - genymotion: http://10.0.3.2:port
+    -USB: IP da máquina na rede
+*/
 
 const api = axios.create({
   baseURL: 'http://10.0.2.2:3333', // Android Studio - 'http://10.0.2.2:3333' / Genymotion - 'http://10.0.3.2:3333'
@@ -1425,7 +1450,7 @@ export default function SignUp({ navigation }) {
 
 ================================================================================
 
-ROTA INICIAL
+ROTA INICIAL (PAREI AQUI)
 
 Se o usuario ja estiver logado, ele ja caia na rota 'dashboard'
 Quando o usuario logar, mudar de tela, de rota para 'dashboard'
@@ -1527,6 +1552,10 @@ export default function App() {
 
   return <Routes />; // Ai aqui vai mudar de pagina
 }
+
+================================================================================
+
+Reiniciar o aplicativo caso nao esteja funcionando
 
 ================================================================================
 
