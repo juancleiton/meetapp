@@ -1,0 +1,138 @@
+PUSH NOTIFICATION
+One Signal
+
+yarn add react-native-onesignal
+react-native link react-native-onesignal
+
+Abrir o arquivo 'AndroidManifest.xml'
+adicionar:
+android:launchMode='singleTop'
+
+--------------------------------------------------------------------------------
+
+app/build.gradle
+adicionar bem no comeco do codigo:
+
+buildscript {
+  repositories {
+      maven { url 'https://plugins.gradle.org/m2/' } // Gradle Plugin Portal
+  }
+  dependencies {
+      classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:[0.12.1, 0.99.99]'
+  }
+}
+
+apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
+
+--------------------------------------------------------------------------------
+
+No site do oneSignal criar um app
+
+No android configurar as firebases
+
+Acessar o firebase da google:
+https://console.firebase.google.com/?pli=1
+
+Criar um projeto
+
+Configuracoes do projeto
+Cloud Messaging
+
+Copiar a chave do servidor
+AAAAcPGlv6M:APA91bEjq5x8TOZ8QgR4Go3UTnD8QAra2kfgXgGlSVOicsQcqFi1_gOOKSA_2FOlig02xY9WeY4rmNglkc9JZyC7gULPj-6txiS24khyJPnBOPrmIa5DtSgFpAnjgP-je_fKF8Os8K-v
+
+Ir no onesignal e colar dentro de Firebase Server Key
+
+----------------------------------------------------------------
+
+Código do remetente
+485090508707
+
+Ir no onesignal e colar dentro de Firebase Sender ID
+
+
+SAVE
+Leave setup
+
+--------------------------------------------------------------------------------
+
+No onesignal ir em
+
+settings > Keys & IDs
+
+copiar o ONESIGNAL APP ID:
+cba6645f-5b86-4cca-950f-2b17ef1491e0
+
+--------------------------------------------------------------------------------
+
+Ir na 'index.js' da 'src':
+
+import React, { Component } from 'react';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Provider } from 'react-redux';
+import { StatusBar } from 'react-native';
+
+// import CodePush from 'react-native-code-push';
+import OneSignal from 'react-native-onesignal';
+
+import '~/config/ReactotronConfig';
+
+import { store, persistor } from './store';
+import App from './App';
+
+export default class Index extends Component {
+  constructor(props) {
+    super(props);
+    OneSignal.init('cba6645f-5b86-4cca-950f-2b17ef1491e0');
+
+    OneSignal.addEventListener('received', this.onReceived);
+    OneSignal.addEventListener('opened', this.onOpened);
+    OneSignal.addEventListener('ids', this.onIds);
+  }
+
+  componentWillUnmount() {
+    OneSignal.removeEventListener('received', this.onReceived);
+    OneSignal.removeEventListener('opened', this.onOpened);
+    OneSignal.removeEventListener('ids', this.onIds);
+  }
+
+  // App Aberto
+  onReceived = data => {};
+
+  onOpened = notification => {};
+
+  onIds = id => {};
+
+  render() {
+    return (
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+          <App />
+        </PersistGate>
+      </Provider>
+    );
+  }
+}
+
+// export default Index();
+
+console.disableYellowBox = true; // Para tirar o erro amarelo de warning
+
+// export default CodePush({
+//   checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME,
+// })(Index)
+
+--------------------------------------------------------------------------------
+
+Ir no site do onesignal
+
+Ir em Audience > All Users e ver se o celular esta conectado,
+
+Ir em messages > new push
+
+Escrever a notificacao
+
+Confirm
+
+E fazer uma notificacao
