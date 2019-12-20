@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import PropTypes from 'prop-types';
-
-import { format, parseISO } from 'date-fns';
-import { pt } from 'date-fns/locale';
-
-import Loader from 'react-loader-spinner';
-
 import {
   MdEdit,
   MdDeleteForever,
   MdDateRange,
   MdLocationOn,
 } from 'react-icons/md';
+import Loader from 'react-loader-spinner';
+import { toast } from 'react-toastify';
+
+import { format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
+import PropTypes from 'prop-types';
 
 import api from '~/services/api';
 import history from '~/services/history';

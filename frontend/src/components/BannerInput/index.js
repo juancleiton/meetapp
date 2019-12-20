@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MdAddAPhoto } from 'react-icons/md';
+
 import { useField } from '@rocketseat/unform';
-import { Container } from './styles';
+
 import api from '~/services/api';
+
+import { Container } from './styles';
 
 export default function BannerInput() {
   const { defaultValue, registerField } = useField('banner');

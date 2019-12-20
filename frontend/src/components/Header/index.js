@@ -2,11 +2,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux'; // Para buscar uma informacao no redux
 import { Link } from 'react-router-dom';
 
-import { Container, Content, Profile } from './styles';
-
 import logo from '~/assets/logo.svg';
-
 import { signOut } from '~/store/modules/auth/actions';
+
+import { Container, Content, Profile } from './styles';
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -44,7 +43,7 @@ export default function Header() {
               />
             </div>
 
-            <div className="barra"></div>
+            <div className="barra" />
 
             <button type="button" onClick={handleSignOut}>
               Sair
