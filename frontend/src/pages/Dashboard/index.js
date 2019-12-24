@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-
-import { Link } from 'react-router-dom';
 import { MdAddCircleOutline, MdChevronRight } from 'react-icons/md';
+import Loader from 'react-loader-spinner';
+import { Link } from 'react-router-dom';
 
 import { format, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
-import Loader from 'react-loader-spinner';
+import api from '~/services/api';
 
 import { Container, Content, MeetupList, Meetup } from './styles';
-
-import api from '~/services/api';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);

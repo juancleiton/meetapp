@@ -94,6 +94,16 @@ Ordenação de imports automática com ESLint Import Helpers
 
 yarn add eslint-plugin-import-helpers -D
 
+'import-helpers' no plugins
+plugins: [
+  'react',
+  'jsx-a11y',
+  'import',
+  'react-hooks',
+  'prettier',
+  'import-helpers',
+],
+
 rules: {
   'import-helpers/order-imports': [
       'warn',
