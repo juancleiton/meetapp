@@ -1,10 +1,13 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import * as Yup from 'yup';
-import { Form, Input } from '@rocketseat/unform';
 import { MdAddCircleOutline } from 'react-icons/md';
-import AvatarInput from './AvatarInput';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { Form, Input } from '@rocketseat/unform';
+import * as Yup from 'yup';
+
 import { updateProfileRequest } from '~/store/modules/user/actions';
+
+import AvatarInput from './AvatarInput';
 import { Container, Content, Button } from './styles';
 
 const schema = Yup.object().shape({
