@@ -36,6 +36,7 @@ yarn add eslint-plugin-react-hooks -D (Acho que nao precisa, pois ja vem integra
 
 yarn
 
+asda
 ================================================================================
 
 '.eslintrc.js':
