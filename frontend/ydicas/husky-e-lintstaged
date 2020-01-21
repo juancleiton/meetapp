@@ -28,8 +28,7 @@ npm install lint-staged --save-dev
 },
 "lint-staged": {
   "*.js": [
-    "eslint --fix",
-    "git add"
+    "eslint --fix src --ext .js"
   ]
 },
 
