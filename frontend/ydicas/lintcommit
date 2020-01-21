@@ -42,7 +42,7 @@ Adicionar o "commit": "git-cz"
 }
 
 git add .
-git commit
+yarn commit / quando for um repositorio so git commit
 
 feat
 scope: enter
