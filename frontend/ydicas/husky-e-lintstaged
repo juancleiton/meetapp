@@ -1,4 +1,5 @@
 yarn add husky -D
+npm install husky --save-dev
 
 // package.json
 {
