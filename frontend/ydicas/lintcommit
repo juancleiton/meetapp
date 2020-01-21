@@ -21,3 +21,13 @@ yarn commitizen init cz-conventional-changelog --yarn --dev --exact
   "test": "react-app-rewired test",
   "eject": "react-scripts eject"
 },
+
+
+Colocar o frontend
+"config": {
+  "commitizen": {
+    "path": "./frontend/node_modules/cz-conventional-changelog"
+  }
+}
+
+yarn commit
