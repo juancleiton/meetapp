@@ -14,12 +14,12 @@ git commit -m "feat: add initial setup"
 yarn add commitizen -D
 yarn commitizen init cz-conventional-changelog --yarn --dev --exact
 
-"scripts": {
-  "commit": "git-cz",
-  "start": "react-app-rewired start",
-  "build": "react-app-rewired build",
-  "test": "react-app-rewired test",
-  "eject": "react-scripts eject"
+"husky": {
+  "hooks": {
+    "pre-commit": "lint-staged",
+    "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+    "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
+  }
 },
 
 
@@ -30,4 +30,17 @@ Colocar o frontend
   }
 }
 
-yarn commit
+git add .
+git commit
+
+feat
+scope: enter
+white a short: add the main application script
+longer description: OOOOOOOOOOOOOK (ou nao precisa)
+breaking changes: no, enter
+issues: no, enter
+
+:wq
+dwadaw
+testando
+dawd
