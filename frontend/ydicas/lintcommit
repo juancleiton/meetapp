@@ -1,4 +1,5 @@
 yarn add @commitlint/{config-conventional,cli} -D
+yarn add @commitlint/config-conventional @commitlint/cli -D
 
 criar na raiz o arquivo 'commitlint.config.js':
 module.exports = {
@@ -26,7 +27,7 @@ yarn commitizen init cz-conventional-changelog --yarn --dev --exact
 Colocar o frontend
 "config": {
   "commitizen": {
-    "path": "./frontend/node_modules/cz-conventional-changelog"
+    "path": "./node_modules/cz-conventional-changelog"
   }
 }
 
@@ -41,6 +42,4 @@ breaking changes: no, enter
 issues: no, enter
 
 :wq
-dwadaw
-testando
-dawd
+
