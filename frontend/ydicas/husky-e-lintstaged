@@ -1,4 +1,4 @@
-yarn add husky -D
+// yarn add husky -D
 npm install husky --save-dev
 
 // package.json
@@ -13,7 +13,7 @@ npm install husky --save-dev
 }
 
 
-yarn add lint-staged -D
+// yarn add lint-staged -D
 npm install lint-staged --save-dev
 
 "lint-staged": {
