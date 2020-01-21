@@ -17,7 +17,6 @@ O repositorio do git deve estar configurando antes de instalar o husky
   "*.js": [
     "eslint --fix"
     "CI=true yarn test --bail --findRelatedTests" // teste com jest
-    "yarn test"
+    "yarn test" // teste com jest
   ]
 },
-
