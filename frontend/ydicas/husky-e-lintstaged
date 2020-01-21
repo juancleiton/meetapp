@@ -1,0 +1,33 @@
+yarn add husky -D
+
+// package.json
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test",
+      "...": "..."
+    }
+  }
+}
+
+
+yarn add lint-staged -D
+
+"lint-staged": {
+    "*": "your-cmd"
+  }
+
+
+"husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test",
+      "...": "..."
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ]
+  },

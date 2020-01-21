@@ -22,13 +22,17 @@ insert_final_newline = true
 ================================================================================
 
 yarn add eslint -D
+n
+
+"yarn o resto" (se precisar)
+
+
 yarn eslint --init
 apagar o package.lock.json
 yarn
 yarn add @babel/core @babel/preset-env @babel/preset-react webpack webpack-cli -D
 yarn add prettier eslint-config-prettier eslint-plugin-prettier babel-eslint -D
-yarn add babel-eslint@10.0.3 -D
-yarn add webpack@4.41.0 -D
+yarn add eslint-plugin-react-hooks -D (Acho que nao precisa, pois ja vem integrado com o creat-react-app)
 
 yarn
 
@@ -177,6 +181,8 @@ Depois criar na raiz o arquivo 'jsconfig.json'
     }
   }
 }
+
+*/
 
 e mudar nos arquivos para '~'
 
@@ -1296,6 +1302,7 @@ import store from '~/store';
 
 rodar o backend
 fazer login e ver no state do reactotron
+
 ================================================================================
 
 ARMAZENANDO PERFIL - ARMAZENANDO DADOS DO USUARIO E TOKEN NO REDUX
