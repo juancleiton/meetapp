@@ -6,3 +6,18 @@ module.exports = {
 };
 
 "package.json"
+
+
+git commit -m "feat: add initial setup"
+
+
+yarn add commitizen -D
+yarn commitizen init cz-conventional-changelog --yarn --dev --exact
+
+"scripts": {
+  "commit": "git-cz",
+  "start": "react-app-rewired start",
+  "build": "react-app-rewired build",
+  "test": "react-app-rewired test",
+  "eject": "react-scripts eject"
+},
