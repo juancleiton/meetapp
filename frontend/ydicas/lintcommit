@@ -6,12 +6,6 @@ module.exports = {
   extends: ['@commitlint/config-conventional'],
 };
 
-"package.json"
-
-
-git commit -m "feat: add initial setup"
-
-
 yarn add commitizen -D
 yarn commitizen init cz-conventional-changelog --yarn --dev --exact
 
@@ -21,7 +15,7 @@ yarn commitizen init cz-conventional-changelog --yarn --dev --exact
   "hooks": {
     "pre-commit": "lint-staged",
     "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-    "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true" // no caso de um repositorio so
+    "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true" // no caso de um repositorio so e nao adicionar o script
   }
 },
 
@@ -42,7 +36,7 @@ Adicionar o "commit": "git-cz"
 }
 
 git add .
-yarn commit / quando for um repositorio so git commit
+yarn commit ou git commit quando for um repositorio so
 
 feat
 scope: enter
@@ -51,4 +45,3 @@ longer description: OOOOOOOOOOOOOK (ou nao precisa)
 breaking changes: no, enter
 issues: no, enter
 
-:wq

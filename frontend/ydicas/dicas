@@ -33,7 +33,7 @@ yarn
 yarn add @babel/core @babel/preset-env @babel/preset-react webpack webpack-cli -D
 yarn add prettier eslint-config-prettier eslint-plugin-prettier babel-eslint -D
 yarn add eslint-plugin-react-hooks -D (Acho que nao precisa, pois ja vem integrado com o creat-react-app)
-
+yarn add webpack@4.41.2 -D
 yarn
 
 asda
