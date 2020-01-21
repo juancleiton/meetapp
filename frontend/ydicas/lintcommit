@@ -1,0 +1,8 @@
+yarn add @commitlint/{config-conventional,cli} -D
+
+criar na raiz o arquivo 'commitlint.config.js':
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+};
+
+"package.json"

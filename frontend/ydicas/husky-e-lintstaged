@@ -1,25 +1,12 @@
+O repositorio do git deve estar configurando antes de instalar o husky
+
 // yarn add husky -D
-npm install husky --save-dev
+"npm install husky --save-dev"
 
 // package.json
-{
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm test",
-      "pre-push": "npm test",
-      "...": "..."
-    }
-  }
-}
-
 
 // yarn add lint-staged -D
-npm install lint-staged --save-dev
-
-"lint-staged": {
-    "*": "your-cmd"
-  }
-
+"npm install lint-staged --save-dev"
 
 "husky": {
   "hooks": {
@@ -28,9 +15,9 @@ npm install lint-staged --save-dev
 },
 "lint-staged": {
   "*.js": [
-    "eslint --fix src --ext .js"
+    "eslint --fix"
+    "CI=true yarn test --bail --findRelatedTests" // teste com jest
+    "yarn test"
   ]
 },
 
-dwadaw
-dwdaw
